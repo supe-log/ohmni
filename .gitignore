@@ -24,7 +24,8 @@ __pycache__/
 /tmp/ohmni_full.log
 
 # --- Large binary assets not needed to build/run ---
-control-app/public/salsa.wav   # 47 MB; salsa.mp3 is kept
+# 47 MB salsa.wav dropped; salsa.mp3 is kept
+control-app/public/salsa.wav
 *.HEIC
 
 # --- OS / editor cruft ---

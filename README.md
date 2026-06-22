@@ -10,6 +10,12 @@ SLAM, navigation, frontier exploration, an LLM agent, and a safety governor.
 > **[docs/CONNECTING_TO_A_NEW_ROBOT.md](docs/CONNECTING_TO_A_NEW_ROBOT.md)** — the
 > exact, step-by-step method for getting a fresh Ohmni on the same network and
 > talking to it. Then [docs/HOST_SETUP.md](docs/HOST_SETUP.md) for the Python stack.
+>
+> **Working on the internals?** Read
+> **[docs/DEVELOPER_NOTES.md](docs/DEVELOPER_NOTES.md)** — how the robot is
+> actually programmed and booted, every system we built (skills, SafetyGovernor,
+> odometry, brain, autoresearch, lidar), and an honest list of the gaps and
+> failure modes.
 
 ---
 

@@ -297,4 +297,14 @@ guarantees a final zero-twist before tear-down).
   used by the dimos blueprints.
 - **`ohmni_archive/archive.sh`** — device backup script (step 8).
 - **`control-app/bot_shell_lidar_dimos.js`** — the on-device lidar patch (step 9).
+
+---
+
+## Going deeper
+
+Once you're connected, **[DEVELOPER_NOTES.md](DEVELOPER_NOTES.md)** explains how
+the robot is actually programmed (the `bot_shell` protocol, the typed skill
+surface), how booting and on-device patching really work (the forked `node`
+process), every system built on top (SafetyGovernor, odometry, brain,
+autoresearch, lidar decoders), and the known gaps and failure modes.
 </content>
