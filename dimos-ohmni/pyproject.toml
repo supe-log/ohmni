@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=70"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dimos-ohmni"
+version = "0.1.0"
+description = "Dimos adapter for OhmniLabs Ohmni 5-2 telepresence robot"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=1.26",
+    "reactivex",
+    "opencv-python",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "ruff"]
+
+[tool.setuptools.packages.find]
+where = ["src"]

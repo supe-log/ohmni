@@ -1,0 +1,26 @@
+diff --git a/dimos/robot/all_blueprints.py b/dimos/robot/all_blueprints.py
+index e82cb656c..fa2db2e7b 100644
+--- a/dimos/robot/all_blueprints.py
++++ b/dimos/robot/all_blueprints.py
+@@ -16,6 +16,13 @@
+ # Run `pytest dimos/robot/test_all_blueprints_generation.py` to regenerate.
+ 
+ all_blueprints = {
++    # Ohmni 5-2 telepresence robot
++    "ohmni-basic": "dimos_ohmni.blueprints.basic:ohmni_basic",
++    "ohmni-smart": "dimos_ohmni.blueprints.smart:ohmni_smart",
++    "ohmni-agentic": "dimos_ohmni.blueprints.agentic:ohmni_agentic",
++    "ohmni-free-roam": "dimos_ohmni.blueprints.free_roam:ohmni_free_roam",
++    "ohmni-full": "dimos_ohmni.blueprints.full:ohmni_full",
++    # ---
+     "arm-teleop": "dimos.teleop.quest.blueprints:arm_teleop",
+     "arm-teleop-dual": "dimos.teleop.quest.blueprints:arm_teleop_dual",
+     "arm-teleop-piper": "dimos.teleop.quest.blueprints:arm_teleop_piper",
+@@ -96,6 +103,7 @@ all_blueprints = {
+ 
+ 
+ all_modules = {
++    "ohmni-connection": "dimos_ohmni.connection:OhmniConnection",
+     "agent": "dimos.agents.agent",
+     "arm-teleop-module": "dimos.teleop.quest.quest_extensions",
+     "camera-module": "dimos.hardware.sensors.camera.module",

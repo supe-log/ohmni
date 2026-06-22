@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>OHMNI_MAPPER</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      colors: {
+        "surface": "#131313", "surface-container-lowest": "#0e0e0e",
+        "surface-container-low": "#1b1b1b", "surface-container": "#1f1f1f",
+        "surface-container-high": "#2a2a2a", "surface-container-highest": "#353535",
+        "surface-bright": "#393939", "on-surface": "#e2e2e2",
+        "on-surface-variant": "#c6c6c6", "outline": "#919191",
+        "outline-variant": "#474747", "primary": "#ffffff",
+        "on-primary": "#1a1c1c", "error": "#ffb4ab", "on-error": "#690005",
+      },
+      fontFamily: { headline: ["Inter"], body: ["Inter"], mono: ["ui-monospace", "monospace"] },
+    },
+  },
+}
+</script>
+<style>
+  body { font-family: 'Inter', sans-serif; }
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: #1b1b1b; }
+  ::-webkit-scrollbar-thumb { background: #474747; }
+</style>
+</head>
+<body class="bg-surface text-on-surface select-none overflow-hidden h-screen flex flex-col">
+
+<!-- HEADER -->
+<header class="flex justify-between items-center w-full h-12 px-6 bg-surface-container-low border-b border-outline-variant z-50 shrink-0">
+  <div class="flex items-center gap-3">
+    <span class="material-symbols-outlined text-primary text-xl">map</span>
+    <h1 class="text-base font-black text-primary tracking-tighter">OHMNI_MAPPER</h1>
+  </div>
+  <div class="flex items-center gap-6">
+    <span id="mapStatus" class="font-label tracking-wider uppercase text-[11px] font-bold text-outline">IDLE</span>
+    <span id="mapStats" class="font-label tracking-wider uppercase text-[11px] font-bold text-outline">CELLS: --</span>
+    <a href="/" class="text-[11px] font-bold tracking-widest uppercase text-outline hover:text-primary transition-colors">CONTROL_PANEL</a>
+  </div>
+</header>
+
+<div class="flex flex-1 overflow-hidden">
+
+<!-- MAP CANVAS -->
+<div class="flex-1 flex items-center justify-center bg-surface-container-lowest p-4 relative">
+  <canvas id="mapCanvas" class="border border-outline-variant" style="image-rendering: pixelated;"></canvas>
+  <!-- Zoom controls -->
+  <div class="absolute bottom-6 right-6 flex flex-col gap-1">
+    <button onclick="zoomIn()" class="w-8 h-8 bg-surface-container border border-outline-variant flex items-center justify-center text-primary font-bold hover:bg-surface-container-highest transition-colors">+</button>
+    <button onclick="zoomOut()" class="w-8 h-8 bg-surface-container border border-outline-variant flex items-center justify-center text-primary font-bold hover:bg-surface-container-highest transition-colors">-</button>
+    <button onclick="zoomFit()" class="w-8 h-8 bg-surface-container border border-outline-variant flex items-center justify-center text-primary text-[8px] font-bold hover:bg-surface-container-highest transition-colors">FIT</button>
+  </div>
+  <!-- Legend -->
+  <div class="absolute top-6 left-6 bg-surface-container/90 border border-outline-variant p-3 text-[9px] font-bold tracking-widest uppercase space-y-1">
+    <div class="flex items-center gap-2"><div class="w-3 h-3 bg-white"></div> WALL</div>
+    <div class="flex items-center gap-2"><div class="w-3 h-3 bg-[#1a3a1a]"></div> FREE</div>
+    <div class="flex items-center gap-2"><div class="w-3 h-3 bg-[#0e0e0e]"></div> UNKNOWN</div>
+    <div class="flex items-center gap-2"><div class="w-3 h-3 bg-[#00ff88]"></div> ROBOT</div>
+    <div class="flex items-center gap-2"><div class="w-3 h-3 bg-[#ff4444]" style="opacity:0.3"></div> LIDAR</div>
+    <div class="flex items-center gap-2"><div class="w-3 h-3 bg-[#ffaa00]"></div> PATH</div>
+  </div>
+</div>
+
+<!-- RIGHT PANEL -->
+<aside class="w-[280px] bg-surface-container-low border-l border-outline-variant flex flex-col overflow-y-auto shrink-0">
+
+  <!-- Mapping Control -->
+  <section class="p-5 border-b border-outline-variant">
+    <div class="flex items-center gap-2 mb-4">
+      <div class="w-1 h-4 bg-primary"></div>
+      <span class="font-label tracking-widest text-[10px] font-bold text-primary uppercase">MAPPING_CONTROL</span>
+    </div>
+    <div class="space-y-2">
+      <button id="btnStartMap" onclick="startMapping()" class="w-full py-3 border border-primary text-primary font-black text-[11px] tracking-[0.2em] uppercase hover:bg-primary hover:text-on-primary transition-colors">
+        START_MAPPING
+      </button>
+      <button id="btnStopMap" onclick="stopMapping()" class="w-full py-2 border border-outline-variant text-outline font-bold text-[10px] tracking-widest uppercase hover:bg-surface-container-highest transition-colors">
+        STOP_MAPPING
+      </button>
+      <button onclick="resetMap()" class="w-full py-2 border border-error/30 text-error/70 font-bold text-[10px] tracking-widest uppercase hover:bg-error/10 transition-colors">
+        RESET_MAP
+      </button>
+    </div>
+  </section>
+
+  <!-- Autonomous Exploration -->
+  <section class="p-5 border-b border-outline-variant">
+    <div class="flex items-center gap-2 mb-4">
+      <div class="w-1 h-4 bg-[#00ff88]"></div>
+      <span class="font-label tracking-widest text-[10px] font-bold text-primary uppercase">AUTO_EXPLORE</span>
+    </div>
+    <div class="space-y-2">
+      <button id="btnExplore" onclick="startExplore()" class="w-full py-3 bg-[#00ff88]/10 border border-[#00ff88]/50 text-[#00ff88] font-black text-[11px] tracking-[0.2em] uppercase hover:bg-[#00ff88]/20 transition-colors">
+        EXPLORE_ROOM
+      </button>
+      <button id="btnStopExplore" onclick="stopExplore()" class="w-full py-2 border border-outline-variant text-outline font-bold text-[10px] tracking-widest uppercase hover:bg-surface-container-highest transition-colors">
+        STOP_EXPLORE
+      </button>
+    </div>
+  </section>
+
+  <!-- Obstacle Distances -->
+  <section class="p-5 border-b border-outline-variant">
+    <div class="flex items-center gap-2 mb-4">
+      <div class="w-1 h-4 bg-outline"></div>
+      <span class="font-label tracking-widest text-[10px] font-bold text-primary uppercase">OBSTACLES_MM</span>
+    </div>
+    <div class="grid grid-cols-2 gap-2">
+      <div class="bg-surface-container p-2 text-center">
+        <div class="text-[8px] text-outline font-bold tracking-widest">FRONT</div>
+        <div id="obsFront" class="text-lg font-black text-primary">--</div>
+      </div>
+      <div class="bg-surface-container p-2 text-center">
+        <div class="text-[8px] text-outline font-bold tracking-widest">BACK</div>
+        <div id="obsBack" class="text-lg font-black text-primary">--</div>
+      </div>
+      <div class="bg-surface-container p-2 text-center">
+        <div class="text-[8px] text-outline font-bold tracking-widest">LEFT</div>
+        <div id="obsLeft" class="text-lg font-black text-primary">--</div>
+      </div>
+      <div class="bg-surface-container p-2 text-center">
+        <div class="text-[8px] text-outline font-bold tracking-widest">RIGHT</div>
+        <div id="obsRight" class="text-lg font-black text-primary">--</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Robot Pose -->
+  <section class="p-5 border-b border-outline-variant">
+    <div class="flex items-center gap-2 mb-4">
+      <div class="w-1 h-4 bg-outline"></div>
+      <span class="font-label tracking-widest text-[10px] font-bold text-primary uppercase">ROBOT_POSE</span>
+    </div>
+    <div class="space-y-2 font-mono text-[11px]">
+      <div class="flex justify-between"><span class="text-outline">X</span><span id="poseX" class="text-primary font-bold">0 mm</span></div>
+      <div class="flex justify-between"><span class="text-outline">Y</span><span id="poseY" class="text-primary font-bold">0 mm</span></div>
+      <div class="flex justify-between"><span class="text-outline">THETA</span><span id="poseTheta" class="text-primary font-bold">0 deg</span></div>
+      <div class="flex justify-between"><span class="text-outline">DISTANCE</span><span id="poseDist" class="text-primary font-bold">0 mm</span></div>
+    </div>
+  </section>
+
+  <!-- Stats -->
+  <section class="p-5 border-b border-outline-variant">
+    <div class="flex items-center gap-2 mb-4">
+      <div class="w-1 h-4 bg-outline"></div>
+      <span class="font-label tracking-widest text-[10px] font-bold text-primary uppercase">MAP_STATS</span>
+    </div>
+    <div class="space-y-2 font-mono text-[11px]">
+      <div class="flex justify-between"><span class="text-outline">SCANS</span><span id="statScans" class="text-primary font-bold">0</span></div>
+      <div class="flex justify-between"><span class="text-outline">FREE_CELLS</span><span id="statFree" class="text-primary font-bold">0</span></div>
+      <div class="flex justify-between"><span class="text-outline">WALL_CELLS</span><span id="statWalls" class="text-primary font-bold">0</span></div>
+      <div class="flex justify-between"><span class="text-outline">AREA_M2</span><span id="statArea" class="text-primary font-bold">0</span></div>
+    </div>
+  </section>
+
+  <!-- Manual Drive (for mapping while driving) -->
+  <section class="p-5">
+    <div class="flex items-center gap-2 mb-4">
+      <div class="w-1 h-4 bg-outline"></div>
+      <span class="font-label tracking-widest text-[10px] font-bold text-primary uppercase">MANUAL_DRIVE</span>
+    </div>
+    <div class="grid grid-cols-3 gap-1 max-w-[144px] mx-auto">
+      <div></div>
+      <button onclick="drive('forward')" class="aspect-square border border-outline flex items-center justify-center text-outline hover:bg-primary hover:text-on-primary transition-colors text-lg font-bold">W</button>
+      <div></div>
+      <button onclick="drive('left')" class="aspect-square border border-outline flex items-center justify-center text-outline hover:bg-primary hover:text-on-primary transition-colors text-lg font-bold">A</button>
+      <button onclick="drive('stop')" class="aspect-square border border-error flex items-center justify-center text-error hover:bg-error hover:text-on-error transition-colors text-[8px] font-bold">STOP</button>
+      <button onclick="drive('right')" class="aspect-square border border-outline flex items-center justify-center text-outline hover:bg-primary hover:text-on-primary transition-colors text-lg font-bold">D</button>
+    </div>
+    <p class="text-[8px] text-outline tracking-widest uppercase text-center mt-2">WASD KEYS ALSO WORK</p>
+  </section>
+
+</aside>
+</div>
+
+<script>
+const canvas = document.getElementById('mapCanvas');
+const ctx = canvas.getContext('2d');
+
+// Map rendering state
+let zoom = 2;
+let panX = 0, panY = 0;
+let mapState = null;
+let pollInterval = null;
+
+const GRID_SIZE = 400;
+const CELL_SIZE_MM = 50;
+const MAP_ORIGIN = GRID_SIZE / 2;
+
+function resizeCanvas() {
+  const container = canvas.parentElement;
+  canvas.width = container.clientWidth - 32;
+  canvas.height = container.clientHeight - 32;
+  render();
+}
+window.addEventListener('resize', resizeCanvas);
+
+function zoomIn() { zoom = Math.min(zoom * 1.5, 20); render(); }
+function zoomOut() { zoom = Math.max(zoom / 1.5, 0.3); render(); }
+function zoomFit() { zoom = Math.min(canvas.width, canvas.height) / GRID_SIZE; panX = 0; panY = 0; render(); }
+
+// Pan with mouse drag
+let dragging = false, dragStartX, dragStartY;
+canvas.addEventListener('mousedown', (e) => { dragging = true; dragStartX = e.clientX - panX; dragStartY = e.clientY - panY; });
+canvas.addEventListener('mousemove', (e) => { if (dragging) { panX = e.clientX - dragStartX; panY = e.clientY - dragStartY; render(); } });
+canvas.addEventListener('mouseup', () => { dragging = false; });
+canvas.addEventListener('mouseleave', () => { dragging = false; });
+canvas.addEventListener('wheel', (e) => { e.preventDefault(); if (e.deltaY < 0) zoomIn(); else zoomOut(); });
+
+function render() {
+  if (!ctx) return;
+  const w = canvas.width, h = canvas.height;
+  ctx.fillStyle = '#0e0e0e';
+  ctx.fillRect(0, 0, w, h);
+
+  if (!mapState) return;
+
+  ctx.save();
+  ctx.translate(w / 2 + panX, h / 2 + panY);
+  ctx.scale(zoom, zoom);
+
+  // Draw free cells
+  ctx.fillStyle = '#1a3a1a';
+  const free = mapState.free;
+  for (let i = 0; i < free.length; i += 2) {
+    const gx = free[i] - MAP_ORIGIN;
+    const gy = free[i + 1] - MAP_ORIGIN;
+    ctx.fillRect(gx, gy, 1, 1);
+  }
+
+  // Draw wall cells
+  ctx.fillStyle = '#ffffff';
+  const walls = mapState.walls;
+  for (let i = 0; i < walls.length; i += 2) {
+    const gx = walls[i] - MAP_ORIGIN;
+    const gy = walls[i + 1] - MAP_ORIGIN;
+    ctx.fillRect(gx, gy, 1, 1);
+  }
+
+  // Draw path
+  if (mapState.path && mapState.path.length > 1) {
+    ctx.strokeStyle = '#ffaa00';
+    ctx.lineWidth = 0.5 / zoom;
+    ctx.beginPath();
+    const p0 = mapState.path[0];
+    ctx.moveTo(p0.x / CELL_SIZE_MM, p0.y / CELL_SIZE_MM);
+    for (let i = 1; i < mapState.path.length; i++) {
+      const p = mapState.path[i];
+      ctx.lineTo(p.x / CELL_SIZE_MM, p.y / CELL_SIZE_MM);
+    }
+    ctx.stroke();
+  }
+
+  // Draw LIDAR rays
+  if (mapState.lidarScan && mapState.lidarScan.length > 0) {
+    const pose = mapState.pose;
+    const rx = pose.x / CELL_SIZE_MM;
+    const ry = pose.y / CELL_SIZE_MM;
+    ctx.strokeStyle = 'rgba(255, 68, 68, 0.15)';
+    ctx.lineWidth = 0.3 / zoom;
+    for (const { angle, distance } of mapState.lidarScan) {
+      if (distance < 150 || distance > 6000) continue;
+      const lidarRad = (angle * Math.PI) / 180;
+      const worldAngle = pose.theta + lidarRad; // Front-mounted: 0° = forward
+      const endX = rx + (distance / CELL_SIZE_MM) * Math.cos(worldAngle);
+      const endY = ry + (distance / CELL_SIZE_MM) * Math.sin(worldAngle);
+      ctx.beginPath();
+      ctx.moveTo(rx, ry);
+      ctx.lineTo(endX, endY);
+      ctx.stroke();
+    }
+  }
+
+  // Draw robot
+  if (mapState.pose) {
+    const pose = mapState.pose;
+    const rx = pose.x / CELL_SIZE_MM;
+    const ry = pose.y / CELL_SIZE_MM;
+    const size = 3;
+
+    // Robot body
+    ctx.fillStyle = '#00ff88';
+    ctx.beginPath();
+    ctx.arc(rx, ry, size, 0, 2 * Math.PI);
+    ctx.fill();
+
+    // Heading indicator
+    ctx.strokeStyle = '#00ff88';
+    ctx.lineWidth = 1 / zoom;
+    ctx.beginPath();
+    ctx.moveTo(rx, ry);
+    ctx.lineTo(rx + size * 2 * Math.cos(pose.theta), ry + size * 2 * Math.sin(pose.theta));
+    ctx.stroke();
+  }
+
+  // Grid origin crosshair
+  ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+  ctx.lineWidth = 0.3 / zoom;
+  ctx.beginPath();
+  ctx.moveTo(-10, 0); ctx.lineTo(10, 0);
+  ctx.moveTo(0, -10); ctx.lineTo(0, 10);
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+// --- API calls ---
+async function startMapping() {
+  await fetch('/api/map/start', { method: 'POST' });
+  startPolling();
+}
+
+async function stopMapping() {
+  await fetch('/api/map/stop', { method: 'POST' });
+  stopPolling();
+}
+
+async function resetMap() {
+  await fetch('/api/map/reset', { method: 'POST' });
+  mapState = null;
+  render();
+}
+
+async function startExplore() {
+  await fetch('/api/map/explore', { method: 'POST' });
+  startPolling();
+}
+
+async function stopExplore() {
+  await fetch('/api/map/explore/stop', { method: 'POST' });
+}
+
+async function drive(action) {
+  await fetch('/api/move', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action, speed: 6, distance: 150, angle: 30, mode: 'tap' })
+  });
+}
+
+async function fetchMapState() {
+  try {
+    const resp = await fetch('/api/map/state');
+    mapState = await resp.json();
+    updateUI();
+    render();
+  } catch (e) {}
+}
+
+function startPolling() {
+  if (pollInterval) return;
+  pollInterval = setInterval(fetchMapState, 400);
+  fetchMapState();
+}
+
+function stopPolling() {
+  if (pollInterval) { clearInterval(pollInterval); pollInterval = null; }
+}
+
+function updateUI() {
+  if (!mapState) return;
+
+  // Status
+  const statusEl = document.getElementById('mapStatus');
+  if (mapState.isExploring) {
+    statusEl.textContent = 'EXPLORING';
+    statusEl.className = 'font-label tracking-wider uppercase text-[11px] font-bold text-[#00ff88]';
+  } else if (mapState.isMapping) {
+    statusEl.textContent = 'MAPPING';
+    statusEl.className = 'font-label tracking-wider uppercase text-[11px] font-bold text-primary';
+  } else {
+    statusEl.textContent = 'IDLE';
+    statusEl.className = 'font-label tracking-wider uppercase text-[11px] font-bold text-outline';
+  }
+
+  // Stats header
+  const cellsMm = CELL_SIZE_MM;
+  document.getElementById('mapStats').textContent =
+    `CELLS: ${mapState.stats.cellsExplored + mapState.stats.cellsOccupied}`;
+
+  // Obstacles
+  const obs = mapState.obstacles;
+  setObstacle('obsFront', obs.front);
+  setObstacle('obsBack', obs.back);
+  setObstacle('obsLeft', obs.left);
+  setObstacle('obsRight', obs.right);
+
+  // Pose
+  document.getElementById('poseX').textContent = Math.round(mapState.pose.x) + ' mm';
+  document.getElementById('poseY').textContent = Math.round(mapState.pose.y) + ' mm';
+  document.getElementById('poseTheta').textContent = Math.round(mapState.pose.theta * 180 / Math.PI) + ' deg';
+  document.getElementById('poseDist').textContent = Math.round(mapState.stats.distanceTravelled) + ' mm';
+
+  // Stats
+  document.getElementById('statScans').textContent = mapState.stats.scans;
+  document.getElementById('statFree').textContent = mapState.stats.cellsExplored;
+  document.getElementById('statWalls').textContent = mapState.stats.cellsOccupied;
+  const areaM2 = ((mapState.stats.cellsExplored + mapState.stats.cellsOccupied) * cellsMm * cellsMm) / 1e6;
+  document.getElementById('statArea').textContent = areaM2.toFixed(2);
+}
+
+function setObstacle(id, val) {
+  const el = document.getElementById(id);
+  el.textContent = val >= 8000 ? 'CLEAR' : Math.round(val);
+  if (val < 600) el.className = 'text-lg font-black text-error';
+  else if (val < 1000) el.className = 'text-lg font-black text-[#ffaa00]';
+  else el.className = 'text-lg font-black text-primary';
+}
+
+// Keyboard controls for driving during mapping
+const keyMap = { 'w': 'forward', 's': 'backward', 'a': 'left', 'd': 'right', ' ': 'stop' };
+document.addEventListener('keydown', (e) => {
+  if (['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+  const action = keyMap[e.key.toLowerCase()];
+  if (action) drive(action);
+});
+
+// Init
+resizeCanvas();
+// Always start polling — the map page should show live data whenever it's open
+startPolling();
+</script>
+</body>
+</html>

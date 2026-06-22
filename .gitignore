@@ -1,0 +1,34 @@
+# --- Python ---
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+
+# --- Vendored upstream (re-cloned, not committed; see docs/HOST_SETUP.md) ---
+# dimos/ is github.com/dimensionalOS/dimos pinned at commit a035fb3 plus the
+# patch in patches/dimos-robot-all_blueprints.patch. 31 GB of source + runtime
+# data — do not commit. Clone it yourself per the setup docs.
+/dimos/
+
+# --- Robot archive (1.5 GB device backup: APK, app data tar, firmware) ---
+# Recreate with `bash ohmni_archive/archive.sh` against a live robot.
+# The archive.sh script itself IS committed (see negation below).
+/ohmni_archive/*
+!/ohmni_archive/archive.sh
+
+# --- Runtime state written by the stack (lives in $HOME, not the repo) ---
+.ohmni/
+*.log
+/tmp/ohmni_full.log
+
+# --- Large binary assets not needed to build/run ---
+control-app/public/salsa.wav   # 47 MB; salsa.mp3 is kept
+*.HEIC
+
+# --- OS / editor cruft ---
+.DS_Store
+*.swp
+.idea/
+.vscode/

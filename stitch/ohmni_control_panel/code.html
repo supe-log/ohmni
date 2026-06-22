@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>OHMNI_TELEPRESENCE_V1</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-background": "#e2e2e2",
+                        "on-error": "#690005",
+                        "on-primary-container": "#000000",
+                        "secondary": "#c6c6c6",
+                        "outline": "#919191",
+                        "tertiary": "#e3e2e2",
+                        "surface-container-lowest": "#0e0e0e",
+                        "secondary-fixed-dim": "#ababab",
+                        "surface-variant": "#353535",
+                        "on-secondary": "#1a1c1c",
+                        "tertiary-fixed": "#5e5e5f",
+                        "inverse-primary": "#5d5f5f",
+                        "secondary-fixed": "#c6c6c6",
+                        "on-tertiary-container": "#000000",
+                        "inverse-on-surface": "#303030",
+                        "inverse-surface": "#e2e2e2",
+                        "on-secondary-fixed": "#1a1c1c",
+                        "error-container": "#93000a",
+                        "surface-container-low": "#1b1b1b",
+                        "on-primary-fixed": "#ffffff",
+                        "error": "#ffb4ab",
+                        "background": "#131313",
+                        "on-tertiary": "#1a1c1c",
+                        "surface": "#131313",
+                        "on-primary-fixed-variant": "#e2e2e2",
+                        "on-primary": "#1a1c1c",
+                        "primary-container": "#d4d4d4",
+                        "surface-container": "#1f1f1f",
+                        "surface-container-highest": "#353535",
+                        "surface-dim": "#131313",
+                        "outline-variant": "#474747",
+                        "tertiary-container": "#909191",
+                        "primary-fixed-dim": "#454747",
+                        "on-surface-variant": "#c6c6c6",
+                        "surface-bright": "#393939",
+                        "on-error-container": "#ffdad6",
+                        "on-tertiary-fixed-variant": "#e3e2e2",
+                        "surface-container-high": "#2a2a2a",
+                        "on-secondary-fixed-variant": "#3a3c3c",
+                        "tertiary-fixed-dim": "#464747",
+                        "secondary-container": "#454747",
+                        "on-tertiary-fixed": "#ffffff",
+                        "primary": "#ffffff",
+                        "surface-tint": "#c6c6c7",
+                        "on-secondary-container": "#e2e2e2",
+                        "on-surface": "#e2e2e2",
+                        "primary-fixed": "#5d5f5f"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0px",
+                        "lg": "0px",
+                        "xl": "0px",
+                        "full": "0px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #131313;
+            color: #e2e2e2;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+        }
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1b1b1b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #474747;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="flex flex-col h-screen">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center w-full px-6 h-16 bg-[#131313] border-b border-[#474747] transition-colors duration-100 ease-in-out fixed top-0 z-50">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-[#ffffff]">precision_manufacturing</span>
+<h1 class="text-lg font-black text-[#ffffff] tracking-tighter">OHMNI_TELEPRESENCE_V1</h1>
+</div>
+<div class="flex items-center gap-8">
+<div class="flex gap-6">
+<span class="font-['Inter'] uppercase tracking-widest text-xs font-bold text-[#ffffff]">SIGNAL: 98%</span>
+<span class="font-['Inter'] uppercase tracking-widest text-xs font-bold text-[#ffffff]">BATTERY: 74%</span>
+<span class="font-['Inter'] uppercase tracking-widest text-xs font-bold text-[#919191]">LATENCY: 12ms</span>
+</div>
+<button class="material-symbols-outlined text-[#ffffff] hover:bg-[#353535] p-2 transition-colors">settings</button>
+</div>
+</header>
+<!-- NavigationDrawer -->
+<aside class="fixed left-0 top-0 h-full z-40 flex flex-col bg-[#1b1b1b] w-64 border-r border-[#474747] pt-16">
+<div class="p-6">
+<h2 class="text-[#ffffff] font-bold font-['Inter'] uppercase tracking-widest text-[10px] mb-4">MODULE_INDEX</h2>
+</div>
+<nav class="flex-1">
+<div class="bg-[#ffffff] text-[#1a1c1c] font-bold p-4 flex items-center gap-4 transition-all duration-75 cursor-pointer">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-['Inter'] uppercase tracking-widest text-[10px]">Telemetry</span>
+</div>
+<div class="text-[#e2e2e2] p-4 flex items-center gap-4 hover:bg-[#2a2a2a] transition-all duration-75 cursor-pointer">
+<span class="material-symbols-outlined">sports_esports</span>
+<span class="font-['Inter'] uppercase tracking-widest text-[10px]">Drive_Control</span>
+</div>
+<div class="text-[#e2e2e2] p-4 flex items-center gap-4 hover:bg-[#2a2a2a] transition-all duration-75 cursor-pointer">
+<span class="material-symbols-outlined">videocam</span>
+<span class="font-['Inter'] uppercase tracking-widest text-[10px]">Head_Position</span>
+</div>
+<div class="text-[#e2e2e2] p-4 flex items-center gap-4 hover:bg-[#2a2a2a] transition-all duration-75 cursor-pointer">
+<span class="material-symbols-outlined">rebase_edit</span>
+<span class="font-['Inter'] uppercase tracking-widest text-[10px]">Action_Sequencer</span>
+</div>
+<div class="text-[#e2e2e2] p-4 flex items-center gap-4 hover:bg-[#2a2a2a] transition-all duration-75 cursor-pointer">
+<span class="material-symbols-outlined">terminal</span>
+<span class="font-['Inter'] uppercase tracking-widest text-[10px]">System_Logs</span>
+</div>
+</nav>
+</aside>
+<!-- Main Canvas Area -->
+<main class="flex-1 ml-64 mt-16 mb-14 p-6 grid grid-cols-12 gap-6 overflow-hidden">
+<!-- Left Column: Vision & Logs -->
+<div class="col-span-8 flex flex-col gap-6 overflow-hidden">
+<!-- Camera Stack -->
+<div class="flex-1 grid grid-rows-3 gap-6">
+<!-- Floor Cam Feed -->
+<div class="row-span-2 relative bg-surface-container border border-outline-variant group">
+<div class="absolute top-0 left-0 w-1 h-full bg-primary"></div>
+<img alt="Floor Camera View" class="w-full h-full object-cover grayscale opacity-80" data-alt="First person perspective from a low robot camera moving through a minimalist industrial office space with concrete floors and sharp architecture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDKTeya3SR1VSTCbblHlizECAZPZCGFj7Ioa-qvqGdwnCLRGbsqpUdqY7aWRydDXyfra4frEryqhjS6eqrjA-BckfL7dOP97XrrkNRd3n_5e4qxZZ1c3UPnuodGPMTfYmiaiBviHhDBBujd4DcGV9q22rsHQu9Z_ZpzllUBkgHgtHNXmL4rxBFwQ2WBn7e8QvSZC4p5ug-5DMblcvYi938ZBCs9b01d2hdGfr3gB1OJR-PcXwgnE4OisBl_o1O1zaOK0b4Jw9n0U7Wg"/>
+<div class="absolute top-4 left-6 bg-surface-container-highest px-3 py-1 flex items-center gap-2">
+<div class="w-2 h-2 bg-primary"></div>
+<span class="font-['Inter'] uppercase tracking-widest text-[10px] font-bold">LIVE_FLOOR_CAM</span>
+</div>
+<div class="absolute bottom-4 right-6 text-primary font-mono text-xs">34.0522° N, 118.2437° W</div>
+</div>
+<!-- Screen Cam Feed -->
+<div class="row-span-1 relative bg-surface-container border border-outline-variant">
+<img alt="Face Camera View" class="w-full h-full object-cover grayscale contrast-125" data-alt="Ultra high contrast monochrome portrait of a futuristic robotic face interface or a minimalist control room display screen" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB9b_eXjg6GEqDqT3MwSpWzbrC6xz0vt8YFRv7PAg3hGnLEGfYKJb4ETj2CFoTH9vCg93Lnc4fkYyL5aq2e7jjys5IkdWd9gCSp79561egZNummm3tktDtFADj8nNlwwtE_Qu7Dohn1QSyeUtK0XFcrR8qAp63PHVXjTBWkFycsHkrU5qtQzLCYYKlyzaQXuefUsBBeD0D6suwp1OA5DAdfReFXkPhcuHvvsigOOn81mnSaQQ2JTYxkBIMWYsbHD73XdAnW2UWG0o09"/>
+<div class="absolute top-4 left-6 bg-surface-container-highest px-3 py-1 flex items-center gap-2">
+<span class="font-['Inter'] uppercase tracking-widest text-[10px] font-bold">SCREEN_INTERFACE</span>
+</div>
+</div>
+</div>
+<!-- Command & Logs -->
+<div class="h-48 flex flex-col gap-2">
+<div class="relative">
+<input class="w-full bg-surface-container-low border-b border-outline-variant focus:border-primary outline-none px-4 py-3 font-mono text-sm tracking-widest uppercase text-primary placeholder:text-outline" placeholder="ENTER COMMAND..." type="text"/>
+<span class="absolute right-4 top-3 text-[10px] text-outline font-bold">READY</span>
+</div>
+<div class="flex-1 bg-surface-container-lowest border border-outline-variant p-4 overflow-y-auto font-mono text-[10px] leading-relaxed text-outline-variant">
+<div class="flex gap-4 mb-1"><span class="text-outline">[14:22:01]</span> <span class="text-on-surface">SYS_INIT: Telepresence link established.</span></div>
+<div class="flex gap-4 mb-1"><span class="text-outline">[14:22:04]</span> <span class="text-on-surface">DRIVE_AUTO: Obstacle detection active.</span></div>
+<div class="flex gap-4 mb-1"><span class="text-outline">[14:22:09]</span> <span class="text-on-surface">HEAD_POS: Calibration complete at (0, 45, 0).</span></div>
+<div class="flex gap-4 mb-1"><span class="text-outline">[14:22:15]</span> <span class="text-primary">COMMAND: manual_override_enabled</span></div>
+<div class="flex gap-4 mb-1"><span class="text-outline">[14:22:18]</span> <span class="text-on-surface">TEMP: Battery core optimal (32C).</span></div>
+<div class="flex gap-4 mb-1"><span class="text-outline">[14:22:22]</span> <span class="text-outline-variant">LOG: Buffer cleared...</span></div>
+</div>
+</div>
+</div>
+<!-- Right Column: Control Panels -->
+<div class="col-span-4 flex flex-col gap-6 overflow-y-auto pr-2">
+<!-- Drive Control -->
+<section class="bg-surface-container border border-outline-variant p-6 relative">
+<div class="absolute top-0 left-0 w-1 h-full bg-primary"></div>
+<div class="flex justify-between items-center mb-8">
+<h3 class="font-['Inter'] uppercase tracking-widest text-xs font-black">Drive_Control</h3>
+<span class="material-symbols-outlined text-sm">sports_esports</span>
+</div>
+<div class="grid grid-cols-3 gap-2 max-w-[200px] mx-auto">
+<div></div>
+<button class="h-16 flex flex-col items-center justify-center border border-outline text-outline hover:bg-primary hover:text-on-primary transition-colors">
+<span class="font-bold text-lg">W</span>
+<span class="text-[8px]">FWD</span>
+</button>
+<div></div>
+<button class="h-16 flex flex-col items-center justify-center border border-outline text-outline hover:bg-primary hover:text-on-primary transition-colors">
+<span class="font-bold text-lg">A</span>
+<span class="text-[8px]">LEFT</span>
+</button>
+<button class="h-16 flex flex-col items-center justify-center border border-outline text-outline hover:bg-primary hover:text-on-primary transition-colors">
+<span class="font-bold text-lg">S</span>
+<span class="text-[8px]">REV</span>
+</button>
+<button class="h-16 flex flex-col items-center justify-center border border-outline text-outline hover:bg-primary hover:text-on-primary transition-colors">
+<span class="font-bold text-lg">D</span>
+<span class="text-[8px]">RIGHT</span>
+</button>
+</div>
+<button class="w-full mt-8 bg-error text-on-error font-black py-4 uppercase tracking-[0.3em] text-sm">
+                    SPACE = EMERGENCY STOP
+                </button>
+</section>
+<!-- Head Position -->
+<section class="bg-surface-container border border-outline-variant p-6">
+<div class="flex justify-between items-center mb-6">
+<h3 class="font-['Inter'] uppercase tracking-widest text-xs font-black">Head_Position</h3>
+<span class="material-symbols-outlined text-sm">videocam</span>
+</div>
+<div class="grid grid-cols-3 gap-2">
+<button class="h-12 border border-outline-variant text-outline hover:bg-surface-container-highest transition-colors flex flex-col items-center justify-center">
+<span class="font-bold">Q</span>
+<span class="text-[8px]">TILT_UP</span>
+</button>
+<button class="h-12 border border-outline-variant text-outline hover:bg-surface-container-highest transition-colors flex flex-col items-center justify-center">
+<span class="font-bold">E</span>
+<span class="text-[8px]">RESET</span>
+</button>
+<button class="h-12 border border-outline-variant text-outline hover:bg-surface-container-highest transition-colors flex flex-col items-center justify-center">
+<span class="font-bold">R</span>
+<span class="text-[8px]">TILT_DN</span>
+</button>
+</div>
+<div class="mt-4 bg-surface-container-lowest h-2 relative">
+<div class="absolute left-1/2 top-0 w-1 h-full bg-primary -translate-x-1/2"></div>
+</div>
+<div class="flex justify-between mt-1 text-[8px] text-outline font-bold uppercase tracking-widest">
+<span>-90°</span>
+<span>CENTER</span>
+<span>+90°</span>
+</div>
+</section>
+<!-- Collapsible Modules -->
+<div class="flex flex-col gap-2">
+<button class="w-full bg-surface-container-low border border-outline-variant px-4 py-3 flex justify-between items-center hover:bg-surface-container-high transition-colors group">
+<span class="font-['Inter'] uppercase tracking-widest text-[10px] font-bold">LED_CONTROL</span>
+<span class="material-symbols-outlined text-sm text-outline group-hover:text-primary">expand_more</span>
+</button>
+<button class="w-full bg-surface-container-low border border-outline-variant px-4 py-3 flex justify-between items-center hover:bg-surface-container-high transition-colors group">
+<span class="font-['Inter'] uppercase tracking-widest text-[10px] font-bold">SPEAK / TTS</span>
+<span class="material-symbols-outlined text-sm text-outline group-hover:text-primary">expand_more</span>
+</button>
+<button class="w-full bg-surface-container-low border border-outline-variant px-4 py-3 flex justify-between items-center hover:bg-surface-container-high transition-colors group">
+<span class="font-['Inter'] uppercase tracking-widest text-[10px] font-bold">DANCE_MACROS</span>
+<span class="material-symbols-outlined text-sm text-outline group-hover:text-primary">expand_more</span>
+</button>
+<div class="mt-4 pt-4 border-t border-outline-variant">
+<h4 class="font-['Inter'] uppercase tracking-widest text-[9px] text-outline mb-3 font-bold">Quick_Actions</h4>
+<div class="grid grid-cols-2 gap-2">
+<button class="text-[10px] font-bold py-2 border border-outline-variant hover:bg-primary hover:text-on-primary transition-colors">DOCK_ROBOT</button>
+<button class="text-[10px] font-bold py-2 border border-outline-variant hover:bg-primary hover:text-on-primary transition-colors">FACE_CENTER</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-stretch h-14 bg-[#131313] border-t border-[#474747]">
+<div class="flex flex-col items-center justify-center text-[#919191] px-6 py-1 hover:bg-[#1f1f1f] scale-100 active:scale-95 transition-transform cursor-pointer">
+<span class="material-symbols-outlined">sensors</span>
+<span class="font-['Inter'] uppercase tracking-[0.2em] text-[9px]">SENSORS</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#919191] px-6 py-1 hover:bg-[#1f1f1f] scale-100 active:scale-95 transition-transform cursor-pointer">
+<span class="material-symbols-outlined">visibility</span>
+<span class="font-['Inter'] uppercase tracking-[0.2em] text-[9px]">CAMERA</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-[#ffffff] text-[#1a1c1c] px-6 py-1 scale-100 active:scale-95 transition-transform cursor-pointer">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">joystick</span>
+<span class="font-['Inter'] uppercase tracking-[0.2em] text-[9px] font-bold">MANUAL</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#919191] px-6 py-1 hover:bg-[#1f1f1f] scale-100 active:scale-95 transition-transform cursor-pointer">
+<span class="material-symbols-outlined">smart_toy</span>
+<span class="font-['Inter'] uppercase tracking-[0.2em] text-[9px]">AUTO</span>
+</div>
+</nav>
+</body></html>

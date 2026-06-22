@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ROBOTIC TELEMETRY UNIT - Control Panel</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-lowest": "#0e0e0e",
+                    "tertiary-container": "#909191",
+                    "error": "#ffb4ab",
+                    "surface-variant": "#353535",
+                    "surface-bright": "#393939",
+                    "secondary": "#c6c6c6",
+                    "surface-dim": "#131313",
+                    "outline-variant": "#474747",
+                    "error-container": "#93000a",
+                    "on-secondary": "#1a1c1c",
+                    "on-error": "#690005",
+                    "on-secondary-fixed": "#1a1c1c",
+                    "background": "#131313",
+                    "surface-container-high": "#2a2a2a",
+                    "on-surface": "#e2e2e2",
+                    "surface-tint": "#c6c6c7",
+                    "on-secondary-fixed-variant": "#3a3c3c",
+                    "inverse-surface": "#e2e2e2",
+                    "on-tertiary-container": "#000000",
+                    "tertiary": "#e3e2e2",
+                    "on-tertiary-fixed-variant": "#e3e2e2",
+                    "inverse-on-surface": "#303030",
+                    "primary": "#ffffff",
+                    "on-secondary-container": "#e2e2e2",
+                    "surface-container-highest": "#353535",
+                    "secondary-container": "#454747",
+                    "on-primary-fixed": "#ffffff",
+                    "on-primary-container": "#000000",
+                    "inverse-primary": "#5d5f5f",
+                    "tertiary-fixed-dim": "#464747",
+                    "secondary-fixed": "#c6c6c6",
+                    "on-error-container": "#ffdad6",
+                    "surface-container-low": "#1b1b1b",
+                    "on-surface-variant": "#c6c6c6",
+                    "surface": "#131313",
+                    "on-tertiary": "#1a1c1c",
+                    "on-background": "#e2e2e2",
+                    "primary-container": "#d4d4d4",
+                    "on-tertiary-fixed": "#ffffff",
+                    "secondary-fixed-dim": "#ababab",
+                    "primary-fixed": "#5d5f5f",
+                    "on-primary-fixed-variant": "#e2e2e2",
+                    "primary-fixed-dim": "#454747",
+                    "tertiary-fixed": "#5e5e5f",
+                    "outline": "#919191",
+                    "on-primary": "#1a1c1c",
+                    "surface-container": "#1f1f1f"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0px",
+                    "lg": "0px",
+                    "xl": "0px",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Inter"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .scanline {
+            background: linear-gradient(to bottom, rgba(255,255,255,0) 50%, rgba(255,255,255,0.02) 50%);
+            background-size: 100% 4px;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface select-none overflow-hidden h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center w-full h-12 px-6 bg-[#1b1b1b] text-white z-50">
+<div class="text-lg font-black tracking-tighter text-white">ROBOTIC TELEMETRY UNIT</div>
+<nav class="flex gap-8 items-center h-full">
+<span class="font-['Inter'] tracking-wider uppercase text-xs font-bold text-white border-b-2 border-white h-full flex items-center px-2">SIGNAL: 98%</span>
+<span class="font-['Inter'] tracking-wider uppercase text-xs font-bold text-neutral-500 h-full flex items-center px-2">BATTERY: 84%</span>
+<span class="font-['Inter'] tracking-wider uppercase text-xs font-bold text-neutral-500 h-full flex items-center px-2">LATENCY: 12ms</span>
+</nav>
+<div class="flex gap-4 items-center">
+<button class="cursor-crosshair active:bg-white active:text-black hover:bg-[#353535] transition-colors p-1">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<button class="cursor-crosshair active:bg-white active:text-black hover:bg-[#353535] transition-colors p-1">
+<span class="material-symbols-outlined">power_settings_new</span>
+</button>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-12 h-[calc(100vh-48px)] flex flex-col items-center py-4 w-20 bg-[#1b1b1b] border-r border-outline-variant z-40">
+<div class="flex flex-col items-center mb-8">
+<div class="w-10 h-10 bg-white flex items-center justify-center text-black font-bold text-xs mb-1">OP</div>
+<span class="font-['Inter'] tracking-[0.2em] uppercase text-[8px] font-semibold text-white">OP_CENTER</span>
+</div>
+<nav class="flex flex-col w-full gap-1">
+<button class="bg-white text-black flex flex-col items-center py-4 w-full transition-none">
+<span class="material-symbols-outlined mb-1">precision_manufacturing</span>
+<span class="font-['Inter'] tracking-[0.2em] uppercase text-[8px] font-semibold">CHASSIS</span>
+</button>
+<button class="text-neutral-400 hover:bg-[#2a2a2a] flex flex-col items-center py-4 w-full transition-none">
+<span class="material-symbols-outlined mb-1">precision_manufacturing</span>
+<span class="font-['Inter'] tracking-[0.2em] uppercase text-[8px] font-semibold">ARM_L</span>
+</button>
+<button class="text-neutral-400 hover:bg-[#2a2a2a] flex flex-col items-center py-4 w-full transition-none">
+<span class="material-symbols-outlined mb-1">precision_manufacturing</span>
+<span class="font-['Inter'] tracking-[0.2em] uppercase text-[8px] font-semibold">ARM_R</span>
+</button>
+<button class="text-neutral-400 hover:bg-[#2a2a2a] flex flex-col items-center py-4 w-full transition-none">
+<span class="material-symbols-outlined mb-1">videocam</span>
+<span class="font-['Inter'] tracking-[0.2em] uppercase text-[8px] font-semibold">VISION</span>
+</button>
+<button class="text-neutral-400 hover:bg-[#2a2a2a] flex flex-col items-center py-4 w-full transition-none">
+<span class="material-symbols-outlined mb-1">sensors</span>
+<span class="font-['Inter'] tracking-[0.2em] uppercase text-[8px] font-semibold">SENSORS</span>
+</button>
+</nav>
+<div class="mt-auto flex flex-col w-full gap-1">
+<button class="text-neutral-400 hover:bg-[#2a2a2a] flex flex-col items-center py-4 w-full transition-none">
+<span class="material-symbols-outlined mb-1">terminal</span>
+<span class="font-['Inter'] tracking-[0.2em] uppercase text-[8px] font-semibold">DIAG</span>
+</button>
+<button class="text-neutral-400 hover:bg-[#2a2a2a] flex flex-col items-center py-4 w-full transition-none">
+<span class="material-symbols-outlined mb-1">list_alt</span>
+<span class="font-['Inter'] tracking-[0.2em] uppercase text-[8px] font-semibold">LOGS</span>
+</button>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-20 flex flex-col w-full overflow-hidden bg-surface">
+<div class="flex h-full">
+<!-- Video Feed Center -->
+<div class="flex-1 p-6 grid grid-rows-[3fr_2fr] gap-6 overflow-y-auto">
+<!-- Primary Cam -->
+<div class="relative bg-surface-container overflow-hidden group">
+<div class="absolute top-4 left-4 z-10 flex items-center gap-2">
+<div class="w-1 h-4 bg-primary"></div>
+<span class="font-headline tracking-widest text-xs font-bold text-white uppercase">LIVE_FLOOR_CAM // 1080P_60FPS</span>
+</div>
+<div class="absolute inset-0 scanline opacity-30 pointer-events-none"></div>
+<img alt="Floor Camera" class="w-full h-full object-cover grayscale opacity-80 mix-blend-screen" data-alt="Monochrome industrial floor view from a low-angle robot perspective, showing metallic surfaces and sharp perspective lines in high contrast black and white" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCtv3rmQiBdvKG96VXciayesMGOLTDd4OsfGBnPfaUGADg6QCrweMSokuUoIyT3AtbSB1QmUS0VYIzdFfHyHSobkumZVIjqFRvQpwDaiSx6r7BUZaBnwkK1cb0KAgdeoe2IZuCDMz9M-jUcTcS791zRBSs-EiOlDZALSqcFEAWXJdzhQ4XAfPfYdgYDWGJyNf1_liA0w26qIKQ5_VdnxxFXy9SRrEl9UVUx0ZnPqCV9tyqplS7fWgD0VWAmotC0vX2TNtADPKQMp8TE"/>
+<div class="absolute bottom-4 right-4 text-[10px] text-white opacity-50 font-mono tracking-tighter">
+                            LAT: 37.7749° N, LONG: 122.4194° W
+                        </div>
+</div>
+<!-- Secondary Feeds -->
+<div class="grid grid-cols-2 gap-6">
+<div class="relative bg-surface-container overflow-hidden">
+<div class="absolute top-4 left-4 z-10 flex items-center gap-2">
+<div class="w-1 h-4 bg-outline"></div>
+<span class="font-headline tracking-widest text-xs font-bold text-white uppercase">SCREEN_INTERFACE</span>
+</div>
+<img alt="Interface Camera" class="w-full h-full object-cover grayscale opacity-50 contrast-125" data-alt="Extreme close up of a monochrome computer screen showing lines of code and digital noise in high contrast black and white" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAULuEAqHfRF93b4hGy-SWsZSuzuRNwcRySFCx9v7S_Zxid-1cbsZFmZk4NEFY8Vmz9K9cOxhPJHS_dY2qXgdJUfQ-v5UXfPSVan82H4O5l0JlfZi8FMvFTqJTBxmMkJZDNrb1x9trIqWFK2w1xtQK-xI9LT5Hcs-5VcPVFQdA0OKoXONgIdTcWxAslwxov70v40sbNe8biO0ezZ8R5vTvab3uVHrBU2d1jE7Jvlm0E4KmTnXUBn7j8ZMgi8kfxWmQPgP-7yIsX9tUE"/>
+</div>
+<div class="relative bg-surface-container overflow-hidden">
+<div class="absolute top-4 left-4 z-10 flex items-center gap-2">
+<div class="w-1 h-4 bg-outline"></div>
+<span class="font-headline tracking-widest text-xs font-bold text-white uppercase">DEPTH_MAPPING</span>
+</div>
+<img alt="Depth Map" class="w-full h-full object-cover grayscale brightness-50" data-alt="Digital wireframe mesh representing a 3D floor space, monochrome aesthetic with glowing white lines on deep black background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCI1ddjaPJbp-gbPU8d91P8_5TXziUoCRrkt3LSdm6Mj52bp8MvBG8FNCqxc0z1ppORBF3PL9S8g5ImRkyvXGz8F9eCEJ99FIo72gKbR4BQ0L4cQ-QiO4lciCHwcFePIYeU7tk5-UK6rXb1pSf-29pIWj8m2gbCOYPhmM6X4Yx4fFC7PRPYgIXGQmQwl5GEbQoqAN_kkTWxB55sGNXTs-A9eEIkj2WCk8c-ZXDXmghiyVho6fi1eoSBfIJHJLF27GStFhb7QYsZFhvF"/>
+</div>
+</div>
+</div>
+<!-- Right Control Modules -->
+<aside class="w-80 bg-surface-container-low border-l border-outline-variant flex flex-col p-6 gap-8">
+<!-- Drive Control -->
+<section class="flex flex-col gap-4">
+<div class="flex items-center gap-2">
+<div class="w-1 h-4 bg-primary"></div>
+<span class="font-headline tracking-widest text-xs font-bold text-white uppercase">DRIVE_CONTROL</span>
+</div>
+<div class="grid grid-cols-3 gap-2">
+<div></div>
+<div class="aspect-square border border-outline flex items-center justify-center font-bold text-xl hover:bg-white hover:text-black cursor-crosshair">W</div>
+<div></div>
+<div class="aspect-square border border-outline flex items-center justify-center font-bold text-xl hover:bg-white hover:text-black cursor-crosshair">A</div>
+<div class="aspect-square border border-outline flex items-center justify-center font-bold text-xl hover:bg-white hover:text-black cursor-crosshair">S</div>
+<div class="aspect-square border border-outline flex items-center justify-center font-bold text-xl hover:bg-white hover:text-black cursor-crosshair">D</div>
+</div>
+<button class="w-full py-4 bg-error text-on-error font-black uppercase tracking-[0.2em] text-sm animate-pulse">
+                            SPACE = EMERGENCY_STOP
+                        </button>
+</section>
+<!-- Head Position -->
+<section class="flex flex-col gap-4">
+<div class="flex items-center gap-2">
+<div class="w-1 h-4 bg-outline"></div>
+<span class="font-headline tracking-widest text-xs font-bold text-white uppercase">HEAD_POSITION</span>
+</div>
+<div class="flex gap-2">
+<div class="flex-1 py-3 border border-outline flex flex-col items-center justify-center cursor-crosshair hover:bg-surface-container-highest">
+<span class="text-lg font-bold">Q</span>
+<span class="text-[8px] opacity-60">TILT_L</span>
+</div>
+<div class="flex-1 py-3 border border-outline flex flex-col items-center justify-center cursor-crosshair hover:bg-surface-container-highest">
+<span class="text-lg font-bold">E</span>
+<span class="text-[8px] opacity-60">CENTER</span>
+</div>
+<div class="flex-1 py-3 border border-outline flex flex-col items-center justify-center cursor-crosshair hover:bg-surface-container-highest">
+<span class="text-lg font-bold">R</span>
+<span class="text-[8px] opacity-60">TILT_R</span>
+</div>
+</div>
+</section>
+<!-- Telemetry Summary -->
+<section class="flex flex-col gap-3 mt-auto">
+<div class="flex justify-between items-end">
+<span class="text-[10px] text-outline font-bold tracking-widest uppercase">RPM</span>
+<span class="text-2xl font-black leading-none">1,420</span>
+</div>
+<div class="w-full h-[2px] bg-surface-container-highest">
+<div class="w-2/3 h-full bg-primary"></div>
+</div>
+<div class="flex justify-between items-end">
+<span class="text-[10px] text-outline font-bold tracking-widest uppercase">VELOCITY</span>
+<span class="text-2xl font-black leading-none">0.85<span class="text-sm"> m/s</span></span>
+</div>
+</section>
+</aside>
+</div>
+<!-- Terminal Footer -->
+<footer class="h-48 bg-surface-container-lowest border-t border-outline-variant flex flex-col">
+<div class="flex border-b border-outline-variant">
+<div class="px-6 py-2 bg-surface-container-high border-r border-outline-variant font-headline tracking-widest text-[10px] font-bold text-white">SYSTEM_LOG</div>
+<div class="px-6 py-2 text-outline-variant font-headline tracking-widest text-[10px] font-bold uppercase">DIAGNOSTICS_VT200</div>
+</div>
+<div class="flex-1 p-4 font-mono text-[11px] overflow-y-auto leading-relaxed text-secondary opacity-80">
+<p><span class="text-outline">[14:20:01]</span> NODE_INITIALIZED: ROBOTIC_CORE_042</p>
+<p><span class="text-outline">[14:20:02]</span> CALIBRATING_CHASSIS: OK</p>
+<p><span class="text-outline">[14:20:02]</span> VISION_FEED_STREAMING: 1080P_RAW</p>
+<p><span class="text-outline">[14:20:05]</span> <span class="text-primary">INFO:</span> OPERATOR_HANDSHAKE_COMPLETE</p>
+<p><span class="text-outline">[14:20:07]</span> DRIVE_SYSTEM: READY_STBY</p>
+<p><span class="text-error">[14:21:12]</span> WARN: PERIPHERAL_LATENCY_SPIKE (14ms)</p>
+<p><span class="text-outline">[14:21:45]</span> COMMAND_RCVD: TILT_HEAD_R</p>
+<p><span class="text-outline">[14:22:01]</span> HEARTBEAT: SIGNAL_STRENGTH_98_PERCENT</p>
+</div>
+<div class="h-10 border-t border-outline-variant flex items-center px-4 bg-surface-container">
+<span class="text-primary font-bold mr-3">&gt;</span>
+<input class="bg-transparent border-none focus:ring-0 w-full text-[11px] font-mono text-white placeholder:text-outline-variant uppercase tracking-widest" placeholder="COMMAND_INPUT" type="text"/>
+</div>
+</footer>
+</main>
+</div>
+</body></html>

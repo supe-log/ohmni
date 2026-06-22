@@ -1,0 +1,1 @@
+- [Ohmni Robot Setup](project_robot_setup.md) — ADB, USB device map (ttyUSB0=LIDAR, ttyUSB1=MCU), LIDAR init sequence, camera/servo details

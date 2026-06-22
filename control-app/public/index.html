@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>OHMNI_TELEPRESENCE_V1</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      colors: {
+        "surface": "#131313",
+        "surface-container-lowest": "#0e0e0e",
+        "surface-container-low": "#1b1b1b",
+        "surface-container": "#1f1f1f",
+        "surface-container-high": "#2a2a2a",
+        "surface-container-highest": "#353535",
+        "surface-bright": "#393939",
+        "on-surface": "#e2e2e2",
+        "on-surface-variant": "#c6c6c6",
+        "outline": "#919191",
+        "outline-variant": "#474747",
+        "primary": "#ffffff",
+        "on-primary": "#1a1c1c",
+        "error": "#ffb4ab",
+        "on-error": "#690005",
+      },
+      borderRadius: {
+        DEFAULT: "0px", lg: "0px", xl: "0px", "2xl": "0px", "3xl": "0px", full: "0px",
+      },
+      fontFamily: {
+        headline: ["Inter"], body: ["Inter"], label: ["Inter"], mono: ["ui-monospace", "monospace"],
+      },
+    },
+  },
+}
+</script>
+<style>
+  body { font-family: 'Inter', sans-serif; }
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+  .scanline {
+    background: linear-gradient(to bottom, rgba(255,255,255,0) 50%, rgba(255,255,255,0.02) 50%);
+    background-size: 100% 4px;
+    pointer-events: none;
+  }
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: #1b1b1b; }
+  ::-webkit-scrollbar-thumb { background: #474747; }
+  /* Custom range slider */
+  input[type=range] {
+    -webkit-appearance: none; appearance: none;
+    background: #2a2a2a; height: 2px; outline: none;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 10px; height: 10px;
+    background: #ffffff; cursor: crosshair; border: none;
+  }
+  input[type=range]::-moz-range-thumb {
+    width: 10px; height: 10px; background: #ffffff;
+    cursor: crosshair; border: none; border-radius: 0;
+  }
+  /* Active state for drive/head buttons */
+  .ctrl-btn.active { background-color: #ffffff !important; color: #1a1c1c !important; }
+  /* Log entry colors */
+  #log .cmd { color: #ffffff; }
+  #log .resp { color: #c6c6c6; }
+  #log .err { color: #ffb4ab; }
+  /* Camera button active */
+  .cam-btn.active { background-color: #ffffff !important; color: #1a1c1c !important; }
+  /* Blink for emergency stop */
+  @keyframes estop-blink { 0%,100% { opacity: 1; } 50% { opacity: 0.7; } }
+  .estop-blink { animation: estop-blink 2s ease-in-out infinite; }
+</style>
+</head>
+<body class="bg-surface text-on-surface select-none overflow-hidden h-screen flex flex-col">
+
+<!-- ===== HEADER ===== -->
+<header class="flex justify-between items-center w-full h-12 px-6 bg-surface-container-low border-b border-outline-variant z-50 shrink-0">
+  <div class="flex items-center gap-3">
+    <span class="material-symbols-outlined text-primary text-xl">precision_manufacturing</span>
+    <h1 class="text-base font-black text-primary tracking-tighter">OHMNI_TELEPRESENCE_V1</h1>
+  </div>
+  <div class="flex items-center gap-8">
+    <div class="flex gap-6">
+      <span id="connStatus" class="font-label tracking-wider uppercase text-[11px] font-bold text-primary">CONNECTING...</span>
+      <span id="batteryLevel" class="font-label tracking-wider uppercase text-[11px] font-bold text-outline">BATTERY: --%</span>
+      <span id="adbStatus" class="font-label tracking-wider uppercase text-[11px] font-bold text-outline">ADB: --</span>
+      <span id="latencyDisplay" class="font-label tracking-wider uppercase text-[11px] font-bold text-outline">LATENCY: --MS</span>
+    </div>
+    <button class="material-symbols-outlined text-primary hover:bg-surface-container-highest p-1 transition-colors text-xl">settings</button>
+  </div>
+</header>
+
+<div class="flex flex-1 overflow-hidden">
+
+<!-- ===== LEFT SIDEBAR ===== -->
+<aside class="flex flex-col items-center py-4 w-[72px] bg-surface-container-low border-r border-outline-variant z-40 shrink-0">
+  <div class="flex flex-col items-center mb-6">
+    <div class="w-9 h-9 bg-primary flex items-center justify-center text-on-primary font-black text-[10px]">OP</div>
+    <span class="font-label tracking-[0.15em] uppercase text-[7px] font-semibold text-primary mt-1">CENTER</span>
+  </div>
+  <nav class="flex flex-col w-full gap-0.5 flex-1">
+    <button class="bg-primary text-on-primary flex flex-col items-center py-3 w-full">
+      <span class="material-symbols-outlined text-lg mb-0.5">sports_esports</span>
+      <span class="font-label tracking-[0.15em] uppercase text-[7px] font-semibold">CONTROL</span>
+    </button>
+    <button class="text-outline hover:bg-surface-container-high flex flex-col items-center py-3 w-full transition-colors">
+      <span class="material-symbols-outlined text-lg mb-0.5">videocam</span>
+      <span class="font-label tracking-[0.15em] uppercase text-[7px] font-semibold">VISION</span>
+    </button>
+    <a href="/map.html" class="text-outline hover:bg-surface-container-high flex flex-col items-center py-3 w-full transition-colors">
+      <span class="material-symbols-outlined text-lg mb-0.5">map</span>
+      <span class="font-label tracking-[0.15em] uppercase text-[7px] font-semibold">MAPPER</span>
+    </a>
+    <a href="/checkin.html" class="text-outline hover:bg-surface-container-high flex flex-col items-center py-3 w-full transition-colors">
+      <span class="material-symbols-outlined text-lg mb-0.5">how_to_reg</span>
+      <span class="font-label tracking-[0.15em] uppercase text-[7px] font-semibold">CHECK-IN</span>
+    </a>
+  </nav>
+  <div class="flex flex-col w-full gap-0.5 mt-auto">
+    <button class="text-outline hover:bg-surface-container-high flex flex-col items-center py-3 w-full transition-colors">
+      <span class="material-symbols-outlined text-lg mb-0.5">terminal</span>
+      <span class="font-label tracking-[0.15em] uppercase text-[7px] font-semibold">DIAG</span>
+    </button>
+    <button class="text-outline hover:bg-surface-container-high flex flex-col items-center py-3 w-full transition-colors">
+      <span class="material-symbols-outlined text-lg mb-0.5">list_alt</span>
+      <span class="font-label tracking-[0.15em] uppercase text-[7px] font-semibold">LOGS</span>
+    </button>
+  </div>
+</aside>
+
+<!-- ===== MAIN CONTENT ===== -->
+<main class="flex-1 flex flex-col overflow-hidden">
+<div class="flex flex-1 overflow-hidden">
+
+<!-- ===== CAMERA FEEDS ===== -->
+<div class="flex-1 p-4 flex flex-col gap-4 overflow-hidden">
+  <!-- Screen Camera (Top) -->
+  <div class="flex-1 relative bg-surface-container border border-outline-variant overflow-hidden group min-h-0">
+    <div class="absolute top-0 left-0 w-1 h-full bg-primary z-10"></div>
+    <img id="cameraFeed0" src="/api/stream/0" alt="Screen Camera" class="w-full h-full object-contain bg-surface-container-lowest"/>
+    <div class="absolute inset-0 scanline opacity-20"></div>
+    <div class="absolute top-3 left-5 z-10 flex items-center gap-2">
+      <div class="w-2 h-2 bg-primary"></div>
+      <span id="camLabel0" class="font-label tracking-widest text-[10px] font-bold text-primary uppercase">SCREEN_INTERFACE // MJPEG</span>
+    </div>
+    <div class="absolute bottom-0 left-0 right-0 bg-surface/80 flex gap-2 p-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+      <button id="btnStream0" class="cam-btn active flex-1 py-1.5 border border-outline-variant text-[9px] font-bold tracking-widest uppercase text-outline hover:bg-primary hover:text-on-primary transition-colors" onclick="setCamera(0,'stream')">STREAM</button>
+      <button id="btnSnap0" class="cam-btn flex-1 py-1.5 border border-outline-variant text-[9px] font-bold tracking-widest uppercase text-outline hover:bg-primary hover:text-on-primary transition-colors" onclick="setCamera(0,'snapshot')">SNAPSHOT</button>
+      <button class="flex-1 py-1.5 border border-outline-variant text-[9px] font-bold tracking-widest uppercase text-outline hover:bg-primary hover:text-on-primary transition-colors" onclick="setCamera(0,'refresh')">REFRESH</button>
+    </div>
+  </div>
+
+  <!-- Floor Camera (Bottom) -->
+  <div class="flex-1 relative bg-surface-container border border-outline-variant overflow-hidden group min-h-0">
+    <div class="absolute top-0 left-0 w-1 h-full bg-outline z-10"></div>
+    <img id="cameraFeed1" src="/api/stream/1" alt="Floor Camera" class="w-full h-full object-contain bg-surface-container-lowest"/>
+    <div class="absolute inset-0 scanline opacity-30"></div>
+    <div class="absolute top-3 left-5 z-10 flex items-center gap-2">
+      <div class="w-2 h-2 bg-primary" id="camDot1"></div>
+      <span id="camLabel1" class="font-label tracking-widest text-[10px] font-bold text-primary uppercase">LIVE_FLOOR_CAM // MJPEG</span>
+    </div>
+    <div class="absolute bottom-0 left-0 right-0 bg-surface/80 flex gap-2 p-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+      <button id="btnStream1" class="cam-btn active flex-1 py-1.5 border border-outline-variant text-[9px] font-bold tracking-widest uppercase text-outline hover:bg-primary hover:text-on-primary transition-colors" onclick="setCamera(1,'stream')">STREAM</button>
+      <button id="btnSnap1" class="cam-btn flex-1 py-1.5 border border-outline-variant text-[9px] font-bold tracking-widest uppercase text-outline hover:bg-primary hover:text-on-primary transition-colors" onclick="setCamera(1,'snapshot')">SNAPSHOT</button>
+      <button class="flex-1 py-1.5 border border-outline-variant text-[9px] font-bold tracking-widest uppercase text-outline hover:bg-primary hover:text-on-primary transition-colors" onclick="setCamera(1,'refresh')">REFRESH</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== RIGHT CONTROL PANEL ===== -->
+<aside class="w-[296px] bg-surface-container-low border-l border-outline-variant flex flex-col overflow-y-auto shrink-0">
+
+  <!-- Drive Control -->
+  <section class="p-5 border-b border-outline-variant">
+    <div class="flex items-center gap-2 mb-5">
+      <div class="w-1 h-4 bg-primary"></div>
+      <span class="font-label tracking-widest text-[10px] font-bold text-primary uppercase">DRIVE_CONTROL</span>
+    </div>
+    <div class="grid grid-cols-3 gap-2 max-w-[192px] mx-auto">
+      <div></div>
+      <button id="btn-forward" class="ctrl-btn aspect-square border border-outline flex flex-col items-center justify-center text-outline hover:bg-primary hover:text-on-primary transition-colors cursor-crosshair"
+        onmousedown="onMoveStart('forward')" onmouseup="onMoveEnd('forward')" onmouseleave="onMoveEnd('forward')"
+        ontouchstart="event.preventDefault(); onMoveStart('forward')" ontouchend="onMoveEnd('forward')" oncontextmenu="return false">
+        <span class="font-bold text-lg">W</span><span class="text-[7px] tracking-widest">FWD</span>
+      </button>
+      <div></div>
+      <button id="btn-left" class="ctrl-btn aspect-square border border-outline flex flex-col items-center justify-center text-outline hover:bg-primary hover:text-on-primary transition-colors cursor-crosshair"
+        onmousedown="onMoveStart('left')" onmouseup="onMoveEnd('left')" onmouseleave="onMoveEnd('left')"
+        ontouchstart="event.preventDefault(); onMoveStart('left')" ontouchend="onMoveEnd('left')" oncontextmenu="return false">
+        <span class="font-bold text-lg">A</span><span class="text-[7px] tracking-widest">LEFT</span>
+      </button>
+      <button id="btn-backward" class="ctrl-btn aspect-square border border-outline flex flex-col items-center justify-center text-outline hover:bg-primary hover:text-on-primary transition-colors cursor-crosshair"
+        onmousedown="onMoveStart('backward')" onmouseup="onMoveEnd('backward')" onmouseleave="onMoveEnd('backward')"
+        ontouchstart="event.preventDefault(); onMoveStart('backward')" ontouchend="onMoveEnd('backward')" oncontextmenu="return false">
+        <span class="font-bold text-lg">S</span><span class="text-[7px] tracking-widest">REV</span>
+      </button>
+      <button id="btn-right" class="ctrl-btn aspect-square border border-outline flex flex-col items-center justify-center text-outline hover:bg-primary hover:text-on-primary transition-colors cursor-crosshair"
+        onmousedown="onMoveStart('right')" onmouseup="onMoveEnd('right')" onmouseleave="onMoveEnd('right')"
+        ontouchstart="event.preventDefault(); onMoveStart('right')" ontouchend="onMoveEnd('right')" oncontextmenu="return false">
+        <span class="font-bold text-lg">D</span><span class="text-[7px] tracking-widest">RIGHT</span>
+      </button>
+    </div>
+    <button id="btn-stop" class="ctrl-btn estop-blink w-full mt-5 bg-error text-on-error font-black py-3 uppercase tracking-[0.2em] text-[11px]" onclick="move('stop')">
+      SPACE = EMERGENCY_STOP
+    </button>
+  </section>
+
+  <!-- Head Position -->
+  <section class="p-5 border-b border-outline-variant">
+    <div class="flex items-center gap-2 mb-4">
+      <div class="w-1 h-4 bg-outline"></div>
+      <span class="font-label tracking-widest text-[10px] font-bold text-primary uppercase">HEAD_POSITION</span>
+    </div>
+    <div class="flex gap-2">
+      <button id="btn-head-up" class="ctrl-btn flex-1 py-3 border border-outline-variant flex flex-col items-center justify-center cursor-crosshair hover:bg-surface-container-highest transition-colors" onclick="move('head_up')">
+        <span class="text-lg font-bold text-on-surface">Q</span><span class="text-[7px] text-outline tracking-widest">TILT_UP</span>
+      </button>
+      <button class="ctrl-btn flex-1 py-3 border border-outline-variant flex flex-col items-center justify-center cursor-crosshair hover:bg-surface-container-highest transition-colors" onclick="move('head_center')">
+        <span class="text-lg font-bold text-on-surface">E</span><span class="text-[7px] text-outline tracking-widest">CENTER</span>
+      </button>
+      <button id="btn-head-down" class="ctrl-btn flex-1 py-3 border border-outline-variant flex flex-col items-center justify-center cursor-crosshair hover:bg-surface-container-highest transition-colors" onclick="move('head_down')">
+        <span class="text-lg font-bold text-on-surface">R</span><span class="text-[7px] text-outline tracking-widest">TILT_DN</span>
+      </button>
+    </div>
+    <div class="mt-3 bg-surface-container-lowest h-[2px] relative">
+      <div class="absolute left-1/2 top-0 w-1 h-full bg-primary -translate-x-1/2"></div>
+    </div>
+    <div class="flex justify-between mt-1 text-[8px] text-outline font-bold uppercase tracking-widest">
+      <span>-90</span><span>CENTER</span><span>+90</span>
+    </div>
+  </section>
+
+  <!-- Parameters -->
+  <section class="p-5 border-b border-outline-variant">
+    <div class="flex items-center gap-2 mb-4">
+      <div class="w-1 h-4 bg-outline"></div>
+      <span class="font-label tracking-widest text-[10px] font-bold text-primary uppercase">PARAMETERS</span>
+    </div>
+    <div class="space-y-3">
+      <div class="flex items-center gap-3">
+        <span class="text-[9px] text-outline font-bold tracking-widest uppercase w-12">SPEED</span>
+        <input type="range" id="speedSlider" min="3" max="18" value="8" class="flex-1"/>
+        <span id="speedVal" class="text-[11px] font-black text-primary w-8 text-right">8</span>
+      </div>
+      <div class="flex items-center gap-3">
+        <span class="text-[9px] text-outline font-bold tracking-widest uppercase w-12">DIST</span>
+        <input type="range" id="distSlider" min="50" max="1000" value="200" step="50" class="flex-1"/>
+        <span id="distVal" class="text-[9px] font-black text-primary w-12 text-right">200MM</span>
+      </div>
+      <div class="flex items-center gap-3">
+        <span class="text-[9px] text-outline font-bold tracking-widest uppercase w-12">ANGLE</span>
+        <input type="range" id="angleSlider" min="15" max="180" value="45" step="15" class="flex-1"/>
+        <span id="angleVal" class="text-[9px] font-black text-primary w-12 text-right">45DEG</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Collapsible Modules -->
+  <div class="flex flex-col">
+    <!-- LED Control -->
+    <button class="w-full bg-surface-container-low border-b border-outline-variant px-5 py-3 flex justify-between items-center hover:bg-surface-container-high transition-colors" onclick="togglePanel('led-panel', this)">
+      <span class="font-label tracking-widest text-[10px] font-bold uppercase">LED_CONTROL</span>
+      <span class="material-symbols-outlined text-sm text-outline panel-chevron">expand_more</span>
+    </button>
+    <div id="led-panel" class="hidden border-b border-outline-variant bg-surface-container p-4">
+      <div class="flex gap-3 items-center justify-center">
+        <input type="color" id="ledColor" value="#ffffff" class="w-8 h-8 border border-outline-variant bg-surface-container cursor-crosshair"/>
+        <button onclick="setLed()" class="py-2 px-4 border border-outline text-[10px] font-bold tracking-widest uppercase hover:bg-primary hover:text-on-primary transition-colors">SET</button>
+        <button onclick="sendRaw('light_color 20 0 0 0')" class="py-2 px-4 border border-outline-variant text-[10px] font-bold tracking-widest uppercase text-outline hover:bg-surface-container-highest transition-colors">OFF</button>
+      </div>
+    </div>
+
+    <!-- Speak / TTS -->
+    <button class="w-full bg-surface-container-low border-b border-outline-variant px-5 py-3 flex justify-between items-center hover:bg-surface-container-high transition-colors" onclick="togglePanel('tts-panel', this)">
+      <span class="font-label tracking-widest text-[10px] font-bold uppercase">SPEAK_TTS</span>
+      <span class="material-symbols-outlined text-sm text-outline panel-chevron">expand_more</span>
+    </button>
+    <div id="tts-panel" class="hidden border-b border-outline-variant bg-surface-container p-4">
+      <div class="flex gap-2">
+        <input type="text" id="ttsInput" placeholder="ENTER TEXT..." class="flex-1 bg-surface-container-low border-b border-outline-variant focus:border-primary outline-none px-3 py-2 font-mono text-[11px] tracking-widest uppercase text-primary placeholder:text-outline" onkeydown="if(event.key==='Enter')speak()"/>
+        <button onclick="speak()" class="py-2 px-4 border border-outline text-[10px] font-bold tracking-widest uppercase hover:bg-primary hover:text-on-primary transition-colors">SAY</button>
+      </div>
+    </div>
+
+    <!-- LIDAR / USB Diagnostics -->
+    <button class="w-full bg-surface-container-low border-b border-outline-variant px-5 py-3 flex justify-between items-center hover:bg-surface-container-high transition-colors" onclick="togglePanel('lidar-panel', this)">
+      <span class="font-label tracking-widest text-[10px] font-bold uppercase">LIDAR_USB_DIAG</span>
+      <span class="material-symbols-outlined text-sm text-outline panel-chevron">expand_more</span>
+    </button>
+    <div id="lidar-panel" class="hidden border-b border-outline-variant bg-surface-container p-4">
+      <div class="space-y-3">
+        <div class="flex justify-between items-center">
+          <span class="text-[10px] text-outline font-bold tracking-widest uppercase">ADB</span>
+          <span id="lidarAdbStatus" class="text-[10px] font-black text-error">--</span>
+        </div>
+        <div class="w-full h-[1px] bg-outline-variant"></div>
+        <div class="flex justify-between items-center">
+          <span class="text-[10px] text-outline font-bold tracking-widest uppercase">LIDAR</span>
+          <span id="lidarDevStatus" class="text-[10px] font-black text-error">--</span>
+        </div>
+        <div class="w-full h-[1px] bg-outline-variant"></div>
+
+        <div class="flex gap-2">
+          <button onclick="scanLidar()" class="flex-1 py-2 border border-outline text-[9px] font-bold tracking-widest uppercase hover:bg-primary hover:text-on-primary transition-colors">SCAN</button>
+          <button onclick="reconnectAdb()" class="flex-1 py-2 border border-outline text-[9px] font-bold tracking-widest uppercase hover:bg-primary hover:text-on-primary transition-colors">RECONNECT</button>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="startLidar()" class="flex-1 py-2 border border-primary text-[9px] font-bold tracking-widest uppercase text-primary hover:bg-primary hover:text-on-primary transition-colors">START_LIDAR</button>
+          <button onclick="stopLidar()" class="flex-1 py-2 border border-error text-[9px] font-bold tracking-widest uppercase text-error hover:bg-error hover:text-on-error transition-colors">STOP_LIDAR</button>
+        </div>
+
+        <div id="lidarOutput" class="bg-surface-container-lowest p-2 max-h-40 overflow-y-auto font-mono text-[9px] text-on-surface-variant leading-relaxed whitespace-pre-wrap hidden"></div>
+
+        <!-- LIDAR Config -->
+        <div class="pt-2 border-t border-outline-variant space-y-2">
+          <span class="text-[9px] text-outline font-bold tracking-widest uppercase">COLLISION_CONFIG</span>
+          <div class="flex items-center gap-2">
+            <span class="text-[8px] text-outline tracking-widest w-16">RPM_HZ</span>
+            <input type="range" id="lidarRpmSlider" min="400" max="1000" value="660" step="50" class="flex-1"/>
+            <span id="lidarRpmVal" class="text-[10px] font-black text-primary w-10 text-right">660</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-[8px] text-outline tracking-widest w-16">FT_WARN</span>
+            <input type="range" id="lidarFwSlider" min="500" max="2000" value="1250" step="50" class="flex-1"/>
+            <span id="lidarFwVal" class="text-[10px] font-black text-primary w-10 text-right">1250</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-[8px] text-outline tracking-widest w-16">FT_STOP</span>
+            <input type="range" id="lidarFsSlider" min="200" max="1500" value="750" step="50" class="flex-1"/>
+            <span id="lidarFsVal" class="text-[10px] font-black text-primary w-10 text-right">750</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-[8px] text-outline tracking-widest w-16">BK_WARN</span>
+            <input type="range" id="lidarBwSlider" min="200" max="2000" value="1350" step="50" class="flex-1"/>
+            <span id="lidarBwVal" class="text-[10px] font-black text-primary w-10 text-right">1350</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-[8px] text-outline tracking-widest w-16">BK_STOP</span>
+            <input type="range" id="lidarBsSlider" min="200" max="1500" value="550" step="50" class="flex-1"/>
+            <span id="lidarBsVal" class="text-[10px] font-black text-primary w-10 text-right">550</span>
+          </div>
+          <button onclick="applyLidarConfig()" class="w-full py-2 border border-outline text-[9px] font-bold tracking-widest uppercase hover:bg-primary hover:text-on-primary transition-colors">APPLY_CONFIG</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dance Macros -->
+    <button class="w-full bg-surface-container-low border-b border-outline-variant px-5 py-3 flex justify-between items-center hover:bg-surface-container-high transition-colors" onclick="togglePanel('dance-panel', this)">
+      <span class="font-label tracking-widest text-[10px] font-bold uppercase">DANCE_MACROS</span>
+      <span class="material-symbols-outlined text-sm text-outline panel-chevron">expand_more</span>
+    </button>
+    <div id="dance-panel" class="hidden border-b border-outline-variant bg-surface-container p-4">
+      <button id="btnDance" onclick="toggleDance()" class="w-full py-3 bg-error text-on-error font-black text-[11px] tracking-[0.2em] uppercase hover:opacity-90 transition-opacity">
+        EXECUTE_SALSA
+      </button>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <section class="p-5 mt-auto">
+    <div class="flex items-center gap-2 mb-3">
+      <span class="font-label tracking-widest text-[9px] font-bold text-outline uppercase">QUICK_ACTIONS</span>
+    </div>
+    <div class="grid grid-cols-2 gap-2">
+      <button onclick="sendRaw('rest_head')" class="text-[9px] font-bold py-2 border border-outline-variant hover:bg-primary hover:text-on-primary transition-colors tracking-widest uppercase">REST_HEAD</button>
+      <button onclick="sendRaw('wake_head')" class="text-[9px] font-bold py-2 border border-outline-variant hover:bg-primary hover:text-on-primary transition-colors tracking-widest uppercase">WAKE_HEAD</button>
+      <button onclick="sendRaw('battery')" class="text-[9px] font-bold py-2 border border-outline-variant hover:bg-primary hover:text-on-primary transition-colors tracking-widest uppercase">BATTERY</button>
+      <button onclick="sendRaw('autodock')" class="text-[9px] font-bold py-2 border border-outline-variant hover:bg-primary hover:text-on-primary transition-colors tracking-widest uppercase">AUTO_DOCK</button>
+    </div>
+  </section>
+
+</aside>
+
+</div>
+
+<!-- ===== TERMINAL FOOTER ===== -->
+<footer class="h-44 bg-surface-container-lowest border-t border-outline-variant flex flex-col shrink-0">
+  <div class="flex border-b border-outline-variant">
+    <div class="px-5 py-1.5 bg-surface-container-high border-r border-outline-variant font-label tracking-widest text-[10px] font-bold text-primary">SYSTEM_LOG</div>
+  </div>
+  <div id="log" class="flex-1 p-3 font-mono text-[10px] overflow-y-auto leading-relaxed text-on-surface-variant"></div>
+  <div class="h-9 border-t border-outline-variant flex items-center px-4 bg-surface-container">
+    <span class="text-primary font-bold mr-2 text-sm">&gt;</span>
+    <input type="text" id="cmdInput" class="bg-transparent border-none focus:ring-0 focus:outline-none w-full text-[11px] font-mono text-primary placeholder:text-outline-variant uppercase tracking-widest" placeholder="COMMAND_INPUT..." onkeydown="if(event.key==='Enter')sendRawCmd()"/>
+  </div>
+</footer>
+
+</main>
+</div>
+
+<script>
+  const log = document.getElementById('log');
+  const speedSlider = document.getElementById('speedSlider');
+  const distSlider = document.getElementById('distSlider');
+  const angleSlider = document.getElementById('angleSlider');
+
+  speedSlider.oninput = () => document.getElementById('speedVal').textContent = speedSlider.value;
+  distSlider.oninput = () => document.getElementById('distVal').textContent = distSlider.value + 'MM';
+  angleSlider.oninput = () => document.getElementById('angleVal').textContent = angleSlider.value + 'DEG';
+
+  function addLog(type, text) {
+    const div = document.createElement('div');
+    div.className = type;
+    const ts = new Date().toLocaleTimeString('en-US', { hour12: false });
+    div.innerHTML = `<span class="text-outline">[${ts}]</span> ${text}`;
+    log.prepend(div);
+    if (log.children.length > 80) log.removeChild(log.lastChild);
+  }
+
+  // Collapsible panels
+  function togglePanel(id, btn) {
+    const panel = document.getElementById(id);
+    panel.classList.toggle('hidden');
+    const chevron = btn.querySelector('.panel-chevron');
+    chevron.textContent = panel.classList.contains('hidden') ? 'expand_more' : 'expand_less';
+  }
+
+  // Camera controls
+  const camNames = { 0: 'SCREEN_INTERFACE', 1: 'LIVE_FLOOR_CAM' };
+  function setCamera(camId, mode) {
+    const img = document.getElementById('cameraFeed' + camId);
+    const label = document.getElementById('camLabel' + camId);
+    document.getElementById('btnStream' + camId).classList.remove('active');
+    document.getElementById('btnSnap' + camId).classList.remove('active');
+    if (mode === 'stream') {
+      img.src = '/api/stream/' + camId;
+      label.textContent = camNames[camId] + ' // MJPEG';
+      document.getElementById('btnStream' + camId).classList.add('active');
+      if (camId === 1) document.getElementById('camDot1').style.backgroundColor = '#ffffff';
+    } else if (mode === 'snapshot') {
+      img.src = '/api/snapshot/' + camId + '?' + Date.now();
+      label.textContent = camNames[camId] + ' // SNAPSHOT';
+      document.getElementById('btnSnap' + camId).classList.add('active');
+      if (camId === 1) document.getElementById('camDot1').style.backgroundColor = '#919191';
+    } else {
+      const src = img.src.split('?')[0];
+      img.src = src + '?' + Date.now();
+    }
+  }
+
+  // --- Tap movement (single step via pre_drive/pre_rot) ---
+  async function move(action) {
+    const speed = parseInt(speedSlider.value);
+    const distance = parseInt(distSlider.value);
+    const angle = parseInt(angleSlider.value);
+    addLog('cmd', action.toUpperCase());
+
+    try {
+      const resp = await fetch('/api/move', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, speed, distance, angle, mode: 'tap' })
+      });
+      const data = await resp.json();
+      if (data.ok && data.response !== 'throttled') addLog('resp', data.response);
+    } catch (e) { addLog('err', e.message); }
+  }
+
+  // --- Continuous movement (manual_move velocity while held) ---
+  async function moveContinuous(action) {
+    const speed = parseInt(speedSlider.value);
+    try {
+      await fetch('/api/move', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, speed, mode: 'continuous' })
+      });
+    } catch (e) { addLog('err', e.message); }
+  }
+
+  // --- Hold vs Tap detection ---
+  const HOLD_THRESHOLD = 180;
+  const holdState = {};
+
+  function onMoveStart(action) {
+    if (action === 'stop') { move('stop'); return; }
+    if (holdState[action]) return;
+
+    const btnId = btnMap[action];
+    if (btnId) document.getElementById(btnId)?.classList.add('active');
+
+    holdState[action] = {
+      timer: setTimeout(() => {
+        holdState[action].continuous = true;
+        moveContinuous(action);
+        addLog('cmd', action.toUpperCase() + ' (HOLD)');
+      }, HOLD_THRESHOLD),
+      continuous: false,
+    };
+  }
+
+  function onMoveEnd(action) {
+    const state = holdState[action];
+    if (!state) return;
+    clearTimeout(state.timer);
+    delete holdState[action];
+
+    const btnId = btnMap[action];
+    if (btnId) document.getElementById(btnId)?.classList.remove('active');
+
+    if (state.continuous) {
+      moveContinuous('stop');
+    } else {
+      move(action);
+    }
+  }
+
+  function stopAllHolds() {
+    let hadContinuous = false;
+    for (const action of Object.keys(holdState)) {
+      clearTimeout(holdState[action].timer);
+      if (holdState[action].continuous) hadContinuous = true;
+      const btnId = btnMap[action];
+      if (btnId) document.getElementById(btnId)?.classList.remove('active');
+      delete holdState[action];
+    }
+    activeKeys.clear();
+    if (hadContinuous) moveContinuous('stop');
+  }
+
+  document.addEventListener('visibilitychange', () => { if (document.hidden) stopAllHolds(); });
+  window.addEventListener('blur', stopAllHolds);
+
+  // TTS
+  async function speak() {
+    const input = document.getElementById('ttsInput');
+    const text = input.value.trim();
+    if (!text) return;
+    input.value = '';
+    await sendRaw('say ' + text);
+  }
+
+  // LED
+  async function setLed() {
+    const hex = document.getElementById('ledColor').value;
+    const r = parseInt(hex.slice(1,3), 16);
+    const g = parseInt(hex.slice(3,5), 16);
+    const b = parseInt(hex.slice(5,7), 16);
+    const max = Math.max(r,g,b), min = Math.min(r,g,b), d = max - min;
+    let h = 0, s = max === 0 ? 0 : (d/max)*255, v = max;
+    if (d > 0) {
+      if (max === r) h = ((g-b)/d + (g<b?6:0)) / 6;
+      else if (max === g) h = ((b-r)/d + 2) / 6;
+      else h = ((r-g)/d + 4) / 6;
+    }
+    h = Math.round(h * 255); s = Math.round(s); v = Math.round(v);
+    await sendRaw(`light_color 20 ${h} ${s} ${v}`);
+  }
+
+  // Raw command
+  async function sendRaw(cmd) {
+    addLog('cmd', '> ' + cmd);
+    try {
+      const resp = await fetch('/api/command', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cmd })
+      });
+      const data = await resp.json();
+      if (data.ok) addLog('resp', data.response);
+      else addLog('err', data.error);
+    } catch (e) { addLog('err', e.message); }
+  }
+
+  async function sendRawCmd() {
+    const input = document.getElementById('cmdInput');
+    const cmd = input.value.trim();
+    if (!cmd) return;
+    input.value = '';
+    await sendRaw(cmd);
+  }
+
+  // Salsa dance
+  let dancing = false;
+  async function toggleDance() {
+    const btn = document.getElementById('btnDance');
+    if (!dancing) {
+      dancing = true;
+      btn.textContent = 'STOP_SALSA';
+      btn.classList.remove('bg-error');
+      btn.classList.add('bg-surface-container-highest', 'text-on-surface');
+      await fetch('/api/dance', { method: 'POST' });
+      addLog('cmd', 'SALSA_DANCE: STARTED');
+    } else {
+      dancing = false;
+      btn.textContent = 'EXECUTE_SALSA';
+      btn.classList.add('bg-error');
+      btn.classList.remove('bg-surface-container-highest', 'text-on-surface');
+      await fetch('/api/dance/stop', { method: 'POST' });
+      addLog('cmd', 'SALSA_DANCE: STOPPED');
+    }
+  }
+
+  // --- LIDAR / USB Diagnostics ---
+  const lidarSliders = {
+    lidarRpmSlider: 'lidarRpmVal',
+    lidarFwSlider: 'lidarFwVal',
+    lidarFsSlider: 'lidarFsVal',
+    lidarBwSlider: 'lidarBwVal',
+    lidarBsSlider: 'lidarBsVal',
+  };
+  for (const [sid, vid] of Object.entries(lidarSliders)) {
+    document.getElementById(sid).oninput = function() {
+      document.getElementById(vid).textContent = this.value;
+    };
+  }
+
+  async function scanLidar() {
+    addLog('cmd', 'LIDAR_SCAN: QUERYING USB DEVICES...');
+    const output = document.getElementById('lidarOutput');
+    output.classList.remove('hidden');
+    output.textContent = 'Scanning...';
+    try {
+      const resp = await fetch('/api/lidar');
+      const data = await resp.json();
+      if (data.ok) {
+        output.textContent = data.status;
+        // Parse for LIDAR indicators
+        const statusEl = document.getElementById('lidarDevStatus');
+        const adbEl = document.getElementById('lidarAdbStatus');
+        adbEl.textContent = data.adbConnected ? 'CONNECTED' : 'OFFLINE';
+        adbEl.className = 'text-[10px] font-black ' + (data.adbConnected ? 'text-primary' : 'text-error');
+        const hasLidar = /ttyUSB|ttyACM|rplidar|sllidar|lidar|cp210/i.test(data.status);
+        statusEl.textContent = hasLidar ? 'DETECTED' : 'NOT FOUND';
+        statusEl.className = 'text-[10px] font-black ' + (hasLidar ? 'text-primary' : 'text-error');
+        addLog('resp', 'LIDAR_SCAN: ' + (hasLidar ? 'DEVICE DETECTED' : 'NO LIDAR DEVICE FOUND'));
+      } else {
+        output.textContent = 'Error: ' + data.error;
+        addLog('err', 'LIDAR_SCAN FAILED: ' + data.error);
+      }
+    } catch (e) {
+      output.textContent = 'Error: ' + e.message;
+      addLog('err', 'LIDAR_SCAN ERROR: ' + e.message);
+    }
+  }
+
+  async function reconnectAdb() {
+    addLog('cmd', 'ADB_RECONNECT: ATTEMPTING...');
+    try {
+      const resp = await fetch('/api/reconnect', { method: 'POST' });
+      const data = await resp.json();
+      const adbEl = document.getElementById('lidarAdbStatus');
+      adbEl.textContent = data.adbConnected ? 'CONNECTED' : 'OFFLINE';
+      adbEl.className = 'text-[10px] font-black ' + (data.adbConnected ? 'text-primary' : 'text-error');
+      addLog(data.ok ? 'resp' : 'err', 'ADB: ' + (data.adbConnected ? 'CONNECTED' : 'FAILED'));
+    } catch (e) { addLog('err', 'ADB_RECONNECT ERROR: ' + e.message); }
+  }
+
+  async function startLidar() {
+    addLog('cmd', 'LIDAR: INITIALIZING DEVICE + COLLISION DETECTION...');
+    try {
+      const resp = await fetch('/api/lidar/scan-device', { method: 'POST' });
+      const data = await resp.json();
+      if (data.ok) {
+        addLog('resp', 'LIDAR: STARTED — ' + data.responses.join(' | '));
+        document.getElementById('lidarDevStatus').textContent = 'ACTIVE';
+        document.getElementById('lidarDevStatus').className = 'text-[10px] font-black text-primary';
+      } else {
+        addLog('err', 'LIDAR START FAILED: ' + data.error);
+      }
+    } catch (e) { addLog('err', 'LIDAR START ERROR: ' + e.message); }
+  }
+
+  async function stopLidar() {
+    addLog('cmd', 'LIDAR: STOPPING...');
+    try {
+      const resp = await fetch('/api/lidar/stop', { method: 'POST' });
+      const data = await resp.json();
+      if (data.ok) {
+        addLog('resp', 'LIDAR: STOPPED — ' + data.responses.join(' | '));
+        document.getElementById('lidarDevStatus').textContent = 'STOPPED';
+        document.getElementById('lidarDevStatus').className = 'text-[10px] font-black text-error';
+      }
+    } catch (e) { addLog('err', 'LIDAR STOP ERROR: ' + e.message); }
+  }
+
+  async function applyLidarConfig() {
+    const config = {
+      lidarRotationSpeed: parseInt(document.getElementById('lidarRpmSlider').value),
+      frontWarningDistance: parseInt(document.getElementById('lidarFwSlider').value),
+      frontStoppingDistance: parseInt(document.getElementById('lidarFsSlider').value),
+      backWarningDistance: parseInt(document.getElementById('lidarBwSlider').value),
+      backStoppingDistance: parseInt(document.getElementById('lidarBsSlider').value),
+    };
+    addLog('cmd', `LIDAR_CONFIG: RPM=${config.lidarRotationSpeed} FW=${config.frontWarningDistance} FS=${config.frontStoppingDistance} BW=${config.backWarningDistance} BS=${config.backStoppingDistance}`);
+    try {
+      const resp = await fetch('/api/lidar/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(config)
+      });
+      const data = await resp.json();
+      addLog(data.ok ? 'resp' : 'err', 'LIDAR_CONFIG: ' + (data.ok ? 'APPLIED' : data.error));
+    } catch (e) { addLog('err', 'LIDAR_CONFIG ERROR: ' + e.message); }
+  }
+
+  // Status polling
+  async function updateStatus() {
+    try {
+      const resp = await fetch('/api/status');
+      const data = await resp.json();
+      const el = document.getElementById('connStatus');
+      const adbEl = document.getElementById('adbStatus');
+      if (data.adbConnected) {
+        adbEl.textContent = 'ADB: LINKED';
+        adbEl.className = 'font-label tracking-wider uppercase text-[11px] font-bold text-primary';
+      } else {
+        adbEl.textContent = 'ADB: OFFLINE';
+        adbEl.className = 'font-label tracking-wider uppercase text-[11px] font-bold text-error';
+      }
+      if (data.connected) {
+        el.textContent = 'SIGNAL: LINKED';
+        el.className = 'font-label tracking-wider uppercase text-[11px] font-bold text-primary';
+      } else {
+        el.textContent = 'SIGNAL: OFFLINE';
+        el.className = 'font-label tracking-wider uppercase text-[11px] font-bold text-error';
+      }
+    } catch {}
+  }
+  async function updateBattery() {
+    try {
+      const resp = await fetch('/api/battery');
+      const data = await resp.json();
+      const match = data.response.match(/battery level: (\d+)/);
+      if (match) {
+        document.getElementById('batteryLevel').textContent = `BATTERY: ${match[1]}%`;
+      }
+    } catch {}
+  }
+  updateStatus(); updateBattery();
+  setInterval(updateStatus, 5000);
+  setInterval(updateBattery, 30000);
+
+  // Keyboard controls
+  const keyMap = {
+    'w': 'forward', 'arrowup': 'forward',
+    's': 'backward', 'arrowdown': 'backward',
+    'a': 'left', 'arrowleft': 'left',
+    'd': 'right', 'arrowright': 'right',
+    ' ': 'stop',
+    'q': 'head_up', 'e': 'head_down', 'r': 'head_center',
+  };
+  const btnMap = {
+    'forward': 'btn-forward', 'backward': 'btn-backward',
+    'left': 'btn-left', 'right': 'btn-right',
+    'stop': 'btn-stop', 'head_up': 'btn-head-up', 'head_down': 'btn-head-down',
+  };
+  const activeKeys = new Set();
+  const headActions = new Set(['head_up', 'head_down', 'head_center']);
+
+  document.addEventListener('keydown', (e) => {
+    if (['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+    const key = e.key.toLowerCase();
+    const action = keyMap[key];
+    if (action && !activeKeys.has(key)) {
+      activeKeys.add(key);
+      if (headActions.has(action)) {
+        move(action);
+        const btnId = btnMap[action];
+        if (btnId) document.getElementById(btnId)?.classList.add('active');
+      } else {
+        onMoveStart(action);
+      }
+    }
+  });
+  document.addEventListener('keyup', (e) => {
+    const key = e.key.toLowerCase();
+    activeKeys.delete(key);
+    const action = keyMap[key];
+    if (action) {
+      if (headActions.has(action)) {
+        const btnId = btnMap[action];
+        if (btnId) document.getElementById(btnId)?.classList.remove('active');
+      } else {
+        onMoveEnd(action);
+      }
+    }
+  });
+
+  // Init log
+  addLog('resp', 'SYS_INIT: TELEPRESENCE_INTERFACE_LOADED');
+</script>
+</body>
+</html>

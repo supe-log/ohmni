@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, user-scalable=no" name="viewport"/>
+<title>OHMNI CHECK-IN</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<!-- QR code generator -->
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<script>
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      colors: {
+        "surface": "#131313", "surface-low": "#1b1b1b", "surface-container": "#1f1f1f",
+        "surface-high": "#2a2a2a", "on-surface": "#e2e2e2", "outline": "#919191",
+        "outline-variant": "#474747", "primary": "#ffffff", "on-primary": "#1a1c1c",
+        "accent": "#00ff88", "error": "#ffb4ab",
+      },
+      fontFamily: { sans: ["Inter"] },
+    },
+  },
+}
+</script>
+<style>
+  body { font-family: 'Inter', sans-serif; }
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+  @keyframes pulse-glow { 0%,100% { box-shadow: 0 0 20px rgba(0,255,136,0.1); } 50% { box-shadow: 0 0 40px rgba(0,255,136,0.3); } }
+  .qr-glow { animation: pulse-glow 3s ease-in-out infinite; }
+  @keyframes flash { 0% { opacity: 0.9; } 100% { opacity: 0; } }
+  .flash-effect { animation: flash 0.4s ease-out; }
+  @keyframes countdown { from { width: 100%; } to { width: 0%; } }
+</style>
+</head>
+<body class="bg-surface text-on-surface overflow-hidden h-screen">
+
+<!-- ===== SCREEN 1: QR CODE (waiting for visitor) ===== -->
+<div id="screen-qr" class="h-full flex flex-col items-center justify-center">
+  <span class="material-symbols-outlined text-accent text-5xl mb-4">how_to_reg</span>
+  <h1 class="text-4xl font-black text-primary tracking-tight mb-2">VISITOR CHECK-IN</h1>
+  <p class="text-sm text-outline tracking-widest uppercase mb-10">SCAN THE QR CODE WITH YOUR PHONE</p>
+
+  <div class="qr-glow bg-white p-5 mb-8">
+    <canvas id="qrCanvas" width="280" height="280"></canvas>
+  </div>
+
+  <p class="text-xs text-outline tracking-widest uppercase mb-1">OR GO TO</p>
+  <p id="manualUrl" class="text-sm font-bold text-accent tracking-wide mb-10"></p>
+
+  <div class="flex items-center gap-2 text-outline">
+    <span class="material-symbols-outlined text-sm">schedule</span>
+    <span id="clock" class="text-sm font-bold tracking-widest uppercase"></span>
+  </div>
+
+  <!-- Admin link -->
+  <button onclick="showScreen('admin')" class="absolute top-4 right-4 material-symbols-outlined text-outline hover:text-primary transition-colors p-2 text-xl">admin_panel_settings</button>
+</div>
+
+<!-- ===== SCREEN 2: PHOTO TIME (visitor submitted on phone) ===== -->
+<div id="screen-photo" class="h-full flex-col items-center justify-center hidden">
+  <div class="text-center mb-6">
+    <span class="material-symbols-outlined text-accent text-4xl mb-2">photo_camera</span>
+    <h1 class="text-3xl font-black text-primary tracking-tight">SMILE, <span id="photoName">VISITOR</span>!</h1>
+    <p class="text-sm text-outline tracking-widest uppercase mt-2">LOOK AT THE CAMERA FOR YOUR PHOTO</p>
+  </div>
+
+  <!-- Camera feed -->
+  <div class="relative mx-auto w-80 h-80 bg-surface-container border-2 border-accent overflow-hidden">
+    <img id="cameraFeed" src="/api/stream/0" alt="Camera" class="w-full h-full object-cover"/>
+    <!-- Face guide circle -->
+    <div class="absolute inset-0 flex items-start justify-center pt-8 pointer-events-none">
+      <div class="w-48 h-48 border-2 border-dashed border-accent/50 rounded-full"></div>
+    </div>
+    <div id="photoFlash" class="absolute inset-0 bg-white opacity-0 pointer-events-none"></div>
+  </div>
+
+  <!-- Countdown + capture -->
+  <div class="mt-6 flex flex-col items-center gap-3">
+    <div id="countdownText" class="text-6xl font-black text-accent">3</div>
+    <p class="text-xs text-outline tracking-widest uppercase">AUTO-CAPTURING...</p>
+  </div>
+
+  <!-- Manual neck adjust -->
+  <div class="absolute bottom-6 right-6 flex flex-col gap-2">
+    <button onclick="adjustNeck('up')" class="w-10 h-10 border border-outline-variant flex items-center justify-center text-outline hover:bg-surface-high transition-colors">
+      <span class="material-symbols-outlined">expand_less</span>
+    </button>
+    <button onclick="adjustNeck('down')" class="w-10 h-10 border border-outline-variant flex items-center justify-center text-outline hover:bg-surface-high transition-colors">
+      <span class="material-symbols-outlined">expand_more</span>
+    </button>
+  </div>
+</div>
+
+<!-- ===== SCREEN 3: DONE ===== -->
+<div id="screen-done" class="h-full flex-col items-center justify-center hidden">
+  <span class="material-symbols-outlined text-accent" style="font-size:80px">check_circle</span>
+  <h1 class="text-4xl font-black text-primary tracking-tight mt-4 mb-2">YOU'RE ALL SET!</h1>
+  <p id="doneName" class="text-xl text-on-surface mb-1"></p>
+  <p class="text-sm text-outline tracking-widest uppercase mb-8">PLEASE HAVE A SEAT. SOMEONE WILL BE WITH YOU SHORTLY.</p>
+
+  <div id="donePhoto" class="w-40 h-40 border-2 border-accent overflow-hidden mb-8">
+    <img id="doneImg" alt="" class="w-full h-full object-cover"/>
+  </div>
+
+  <!-- Auto-reset countdown bar -->
+  <div class="w-64 h-1 bg-surface-high overflow-hidden">
+    <div id="resetBar" class="h-full bg-accent" style="animation: countdown 12s linear forwards"></div>
+  </div>
+  <p class="text-[10px] text-outline tracking-widest uppercase mt-2">RESETTING FOR NEXT VISITOR...</p>
+</div>
+
+<!-- ===== SCREEN 4: ADMIN ===== -->
+<div id="screen-admin" class="h-full flex-col hidden">
+  <header class="flex justify-between items-center px-6 py-4 border-b border-outline-variant">
+    <button onclick="showScreen('qr'); startSession();" class="flex items-center gap-2 text-outline hover:text-primary transition-colors">
+      <span class="material-symbols-outlined">arrow_back</span>
+      <span class="text-sm font-bold tracking-widest uppercase">KIOSK</span>
+    </button>
+    <h1 class="text-lg font-black text-primary tracking-tight">CHECK-IN LOG</h1>
+    <button onclick="loadAdmin()" class="px-3 py-1 border border-outline text-[10px] font-bold tracking-widest uppercase text-outline hover:bg-primary hover:text-on-primary transition-colors">REFRESH</button>
+  </header>
+  <div class="flex-1 overflow-y-auto p-4">
+    <div id="adminLog" class="space-y-2 max-w-3xl mx-auto"></div>
+  </div>
+  <footer class="px-6 py-2 border-t border-outline-variant">
+    <span id="adminCount" class="text-[10px] font-bold tracking-widest uppercase text-outline">0 CHECK-INS</span>
+  </footer>
+</div>
+
+<script>
+// --- State ---
+let currentSession = null;
+let pollInterval = null;
+let countdownTimer = null;
+const BASE_URL = location.origin; // e.g. http://192.168.1.253:3333
+
+// --- Screen management ---
+function showScreen(name) {
+  document.querySelectorAll('[id^="screen-"]').forEach(el => {
+    el.classList.add('hidden');
+    el.classList.remove('flex');
+  });
+  const el = document.getElementById('screen-' + name);
+  el.classList.remove('hidden');
+  el.classList.add('flex');
+}
+
+// --- Clock ---
+function updateClock() {
+  const now = new Date();
+  document.getElementById('clock').textContent =
+    now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }).toUpperCase() +
+    ' // ' + now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+}
+updateClock();
+setInterval(updateClock, 10000);
+
+// --- Session management ---
+async function startSession() {
+  // Stop any existing poll
+  if (pollInterval) { clearInterval(pollInterval); pollInterval = null; }
+
+  try {
+    const resp = await fetch('/api/checkin/session', { method: 'POST' });
+    const data = await resp.json();
+    currentSession = data.session;
+
+    // Generate QR code pointing to mobile check-in page
+    const mobileUrl = `${BASE_URL}/checkin-mobile.html?s=${currentSession.id}`;
+    document.getElementById('manualUrl').textContent = mobileUrl.replace('http://', '');
+
+    QRCode.toCanvas(document.getElementById('qrCanvas'), mobileUrl, {
+      width: 280, margin: 0, color: { dark: '#000000', light: '#ffffff' },
+      errorCorrectionLevel: 'M',
+    });
+
+    // Poll for session state changes
+    pollInterval = setInterval(pollSession, 1000);
+  } catch (e) {
+    console.error('Failed to start session:', e);
+    // Retry in 3s
+    setTimeout(startSession, 3000);
+  }
+}
+
+async function pollSession() {
+  if (!currentSession) return;
+  try {
+    const resp = await fetch(`/api/checkin/session/${currentSession.id}`);
+    const data = await resp.json();
+    if (!data.ok) { startSession(); return; } // Session expired
+    currentSession = data.session;
+
+    if (currentSession.state === 'submitted') {
+      // Visitor submitted on phone — switch to photo screen
+      clearInterval(pollInterval); pollInterval = null;
+      showPhotoScreen();
+    }
+  } catch (e) {
+    // Network error, keep polling
+  }
+}
+
+// --- Photo screen ---
+function showPhotoScreen() {
+  document.getElementById('photoName').textContent = currentSession.name.split(' ')[0].toUpperCase();
+  showScreen('photo');
+
+  // Countdown 3-2-1 then capture
+  let count = 3;
+  const countEl = document.getElementById('countdownText');
+  countEl.textContent = count;
+
+  countdownTimer = setInterval(async () => {
+    count--;
+    if (count > 0) {
+      countEl.textContent = count;
+    } else if (count === 0) {
+      countEl.textContent = '';
+      clearInterval(countdownTimer);
+      await capturePhoto();
+    }
+  }, 1200);
+}
+
+async function capturePhoto() {
+  // Flash effect
+  const flash = document.getElementById('photoFlash');
+  flash.classList.add('flash-effect');
+  flash.style.opacity = '0.9';
+  setTimeout(() => { flash.style.opacity = '0'; flash.classList.remove('flash-effect'); }, 400);
+
+  try {
+    const resp = await fetch(`/api/checkin/session/${currentSession.id}/capture`, { method: 'POST' });
+    const data = await resp.json();
+
+    if (data.ok) {
+      // Show done screen
+      document.getElementById('doneName').textContent = `Welcome, ${currentSession.name}!`;
+      if (data.record.photoFile) {
+        document.getElementById('doneImg').src = `/api/checkin/photo/${data.record.photoFile}?${Date.now()}`;
+      }
+      showScreen('done');
+
+      // Reset after 12 seconds
+      setTimeout(() => {
+        showScreen('qr');
+        startSession();
+      }, 12000);
+    } else {
+      // Retry
+      setTimeout(capturePhoto, 2000);
+    }
+  } catch (e) {
+    console.error('Capture failed:', e);
+    setTimeout(capturePhoto, 2000);
+  }
+}
+
+// --- Neck adjust ---
+function adjustNeck(dir) {
+  fetch('/api/checkin/adjust-neck', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ direction: dir })
+  });
+}
+
+// --- Admin ---
+async function loadAdmin() {
+  try {
+    const resp = await fetch('/api/checkins');
+    const data = await resp.json();
+    const log = document.getElementById('adminLog');
+
+    if (!data.checkins || data.checkins.length === 0) {
+      log.innerHTML = '<p class="text-center text-outline py-12 tracking-widest uppercase text-sm">No check-ins yet</p>';
+      document.getElementById('adminCount').textContent = '0 CHECK-INS';
+      return;
+    }
+
+    const sorted = [...data.checkins].reverse();
+    const today = new Date().toDateString();
+    const todayCount = sorted.filter(c => new Date(c.timestamp).toDateString() === today).length;
+    document.getElementById('adminCount').textContent = `${todayCount} TODAY // ${sorted.length} TOTAL`;
+
+    log.innerHTML = sorted.map(c => {
+      const t = new Date(c.timestamp);
+      const time = t.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+      const photo = c.photoFile
+        ? `<img src="/api/checkin/photo/${c.photoFile}" class="w-11 h-11 object-cover"/>`
+        : `<div class="w-11 h-11 bg-surface-high flex items-center justify-center"><span class="material-symbols-outlined text-outline text-sm">person</span></div>`;
+      return `<div class="flex items-center gap-3 p-3 bg-surface-container border border-outline-variant">
+        ${photo}
+        <div class="flex-1 min-w-0">
+          <div class="font-bold text-primary text-sm truncate">${esc(c.name)}</div>
+          <div class="text-[10px] text-outline tracking-widest uppercase truncate">${esc(c.company || '')}${c.company && c.purpose ? ' // ' : ''}${esc(c.purpose || '')}</div>
+        </div>
+        <div class="text-[10px] text-outline font-bold tracking-widest shrink-0">${time.toUpperCase()}</div>
+        <button onclick="deleteCheckin('${c.id}')" class="material-symbols-outlined text-outline hover:text-error text-sm p-1 shrink-0">delete</button>
+      </div>`;
+    }).join('');
+  } catch (e) {
+    document.getElementById('adminLog').innerHTML = `<p class="text-error">${e.message}</p>`;
+  }
+}
+
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+async function deleteCheckin(id) {
+  await fetch('/api/checkin/' + id, { method: 'DELETE' });
+  loadAdmin();
+}
+
+// --- Init ---
+startSession();
+</script>
+</body>
+</html>
